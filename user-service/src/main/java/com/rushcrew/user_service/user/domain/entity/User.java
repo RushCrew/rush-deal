@@ -47,4 +47,25 @@ public class User {
 
         return user;
     }
+
+    public void updateUser(String newPassword, String newName) {
+        changePassword(newPassword);
+        changeName(newName);
+    }
+
+    private void changePassword(String newPassword) {
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("비밀번호는 필수입니다");
+        }
+
+        this.password = newPassword;
+    }
+
+    private void changeName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("이름은 필수입니다");
+        }
+        this.name = name;
+    }
+
 }
