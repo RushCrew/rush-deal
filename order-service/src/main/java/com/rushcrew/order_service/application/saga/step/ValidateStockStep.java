@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import com.rushcrew.common.exception.BusinessException;
 import com.rushcrew.order_service.application.command.dto.command.CreateOrderCommand;
 import com.rushcrew.order_service.application.port.dto.TimeDealInfo;
-import com.rushcrew.order_service.application.port.out.QueuePort;
 import com.rushcrew.order_service.application.port.out.TimeDealStockPort;
 import com.rushcrew.order_service.application.saga.dto.OrderCreationSagaData;
 import com.rushcrew.order_service.application.saga.dto.SagaContext;
@@ -24,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ValidateStockStep {
 
 	private final TimeDealStockPort timeDealStockPort;
-	private final QueuePort queuePort;
 	private final QueueTokenValidator queueTokenValidator;
 	private final TimeDealValidator timeDealValidator;
 	private final OrderItemValidator orderItemValidator;
