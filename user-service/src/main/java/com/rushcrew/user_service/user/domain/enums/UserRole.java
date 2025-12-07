@@ -12,7 +12,7 @@ public enum UserRole {
 
     private final String description;
 
-    public static UserRole from(String role) {
+    public static UserRole of(String role) {
         if (role == null || role.trim().isEmpty()) {
             throw new IllegalArgumentException("권한은 필수입니다");
         }
