@@ -44,8 +44,6 @@ public class UserService {
 
         User savedUser = userRepository.save(user);
 
-        // TODO point 지갑 생성
-
         return new UserCreateResult(
             savedUser.getUserId(),
             savedUser.getEmail(),
