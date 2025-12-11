@@ -1,6 +1,8 @@
 package com.rushcrew.auth_service.auth.presentation.util;
 
 import com.rushcrew.auth_service.auth.application.policy.TokenPolicy;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
+import com.rushcrew.common.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseCookie;
@@ -54,7 +56,7 @@ public class TokenUtils {
 
     public String extractAccessToken(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {
-            throw new IllegalArgumentException("Authorization 헤더 형식이 올바르지 않습니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN);
         }
         return authorizationHeader.substring(BEARER_PREFIX.length());
     }

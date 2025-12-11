@@ -2,6 +2,8 @@ package com.rushcrew.auth_service.auth.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
+import com.rushcrew.common.exception.BusinessException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +16,7 @@ public class UserId {
 
     public static UserId of(Long value) {
         if (value == null || value <= 0) {
-            throw new IllegalArgumentException("User ID는 양수여야 합니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_USER_ID);
         }
         return new UserId(value);
     }

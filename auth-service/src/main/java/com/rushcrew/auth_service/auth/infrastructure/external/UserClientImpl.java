@@ -6,11 +6,14 @@ import com.rushcrew.auth_service.auth.application.command.SignUpCommand;
 import com.rushcrew.auth_service.auth.application.result.UserCreateResult;
 import com.rushcrew.auth_service.auth.application.result.UserInfoResult;
 import com.rushcrew.auth_service.auth.application.result.VerifyPasswordResult;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
 import com.rushcrew.auth_service.auth.infrastructure.external.dto.UserCreateRequest;
 import com.rushcrew.auth_service.auth.infrastructure.external.dto.UserCreateResponse;
 import com.rushcrew.auth_service.auth.infrastructure.external.dto.UserInfoResponse;
 import com.rushcrew.auth_service.auth.infrastructure.external.dto.VerifyPasswordRequest;
 import com.rushcrew.auth_service.auth.infrastructure.external.dto.VerifyPasswordResponse;
+import com.rushcrew.common.exception.BusinessException;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -24,24 +27,37 @@ public class UserClientImpl implements UserClient {
     public UserCreateResult createUser(SignUpCommand command) {
         UserCreateRequest request = UserCreateRequest.fromCommand(command);
 
-        UserCreateResponse response = userFeignClient.createUser(request);
+        try {
+            UserCreateResponse response = userFeignClient.createUser(request);
+            return response.toResult();
+        } catch (FeignException e) {
+            if (e.status() == 409) {
+                throw new BusinessException(AuthErrorCode.DUPLICATE_EMAIL);
+            }
 
-        return response.toResult();
+            throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+        }
     }
 
     @Override
     public VerifyPasswordResult verifyPassword(LoginCommand command) {
         VerifyPasswordRequest request = VerifyPasswordRequest.fromCommand(command);
 
-        VerifyPasswordResponse response = userFeignClient.verifyPassword(request);
-
-        return response.toResult();
+        try {
+            VerifyPasswordResponse response = userFeignClient.verifyPassword(request);
+            return response.toResult();
+        } catch (FeignException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
+        }
     }
 
     @Override
     public UserInfoResult getUserById(Long userId) {
-        UserInfoResponse response = userFeignClient.getUserById(userId);
-
-        return response.toResult();
+        try {
+            UserInfoResponse response = userFeignClient.getUserById(userId);
+            return response.toResult();
+        } catch (FeignException e) {
+            throw new BusinessException(AuthErrorCode.USER_NOT_FOUND);
+        }
     }
 }

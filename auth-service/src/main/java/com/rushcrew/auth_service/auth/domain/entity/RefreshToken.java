@@ -3,9 +3,11 @@ package com.rushcrew.auth_service.auth.domain.entity;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
 import com.rushcrew.auth_service.auth.domain.vo.TokenExpiry;
 import com.rushcrew.auth_service.auth.domain.vo.TokenId;
 import com.rushcrew.auth_service.auth.domain.vo.UserId;
+import com.rushcrew.common.exception.BusinessException;
 import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -51,7 +53,7 @@ public class RefreshToken {
 
     public void ensureValid() {
         if (isExpired()) {
-            throw new IllegalArgumentException("토큰이 만료되었습니다.");
+            throw new BusinessException(AuthErrorCode.TOKEN_EXPIRED);
         }
     }
 

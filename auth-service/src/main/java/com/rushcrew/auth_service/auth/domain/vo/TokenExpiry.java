@@ -3,6 +3,8 @@ package com.rushcrew.auth_service.auth.domain.vo;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
+import com.rushcrew.common.exception.BusinessException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import lombok.AccessLevel;
@@ -17,11 +19,11 @@ public class TokenExpiry {
 
     public static TokenExpiry create(LocalDateTime expiresAt) {
         if (expiresAt == null) {
-            throw new IllegalArgumentException("만료 시간은 null일 수 없습니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN_EXPIRY);
         }
 
         if (expiresAt.isBefore(LocalDateTime.now())) {
-            throw new IllegalArgumentException("만료 시간은 현재 시간 이후여야 합니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN_EXPIRY);
         }
 
         return new TokenExpiry(expiresAt.truncatedTo(ChronoUnit.SECONDS));
@@ -29,7 +31,7 @@ public class TokenExpiry {
 
     public static TokenExpiry fromMilliseconds(long millis) {
         if (millis <= 0) {
-            throw new IllegalArgumentException("만료 시간은 양수여야 합니다");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN_EXPIRY);
         }
 
         LocalDateTime expiresAt = LocalDateTime.now().plus(
@@ -44,7 +46,7 @@ public class TokenExpiry {
         @JsonProperty("expiresAt") LocalDateTime expiresAt
     ) {
         if (expiresAt == null) {
-            throw new IllegalArgumentException("만료 시간은 null일 수 없습니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN_EXPIRY);
         }
         return new TokenExpiry(expiresAt.truncatedTo(ChronoUnit.SECONDS));
     }

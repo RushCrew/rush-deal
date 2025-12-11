@@ -2,6 +2,8 @@ package com.rushcrew.auth_service.auth.domain.vo;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
+import com.rushcrew.common.exception.BusinessException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +16,7 @@ public class TokenId {
 
     public static TokenId of(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException("Token ID는 필수입니다.");
+            throw new BusinessException(AuthErrorCode.INVALID_TOKEN_ID);
         }
         return new TokenId(value);
     }

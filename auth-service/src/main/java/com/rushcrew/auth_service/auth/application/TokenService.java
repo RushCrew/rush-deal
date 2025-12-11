@@ -6,9 +6,11 @@ import com.rushcrew.auth_service.auth.application.port.RefreshTokenProvider;
 import com.rushcrew.auth_service.auth.application.result.TokenPairResult;
 import com.rushcrew.auth_service.auth.application.result.UserInfoResult;
 import com.rushcrew.auth_service.auth.domain.entity.RefreshToken;
+import com.rushcrew.auth_service.auth.domain.exception.AuthErrorCode;
 import com.rushcrew.auth_service.auth.domain.policy.ConcurrentLoginPolicy;
 import com.rushcrew.auth_service.auth.domain.repository.RefreshTokenRepository;
 import com.rushcrew.auth_service.auth.domain.vo.UserId;
+import com.rushcrew.common.exception.BusinessException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -68,9 +70,7 @@ public class TokenService {
         RefreshToken token = refreshTokenRepository
             .findByToken(refreshTokenValue)
             .orElseThrow(() ->
-                new IllegalArgumentException(
-                    "유효하지 않은 Refresh Token입니다."
-                )
+                new BusinessException(AuthErrorCode.REFRESH_TOKEN_NOT_FOUND)
             );
 
         token.ensureValid();
