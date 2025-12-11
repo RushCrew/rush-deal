@@ -7,7 +7,10 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @EnableFeignClients
 @ConfigurationPropertiesScan
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+    "com.rushcrew.auth_service",
+    "com.rushcrew.common.exception"
+})
 public class AuthServiceApplication {
 
     public static void main(String[] args) {

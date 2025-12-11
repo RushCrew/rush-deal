@@ -7,6 +7,9 @@ dependencies {
 	// eureka
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
+	// 공통 모듈
+	implementation 'com.github.RushCrew:rush-deal-common:v0.0.7'
+
 	// database
 	runtimeOnly 'org.postgresql:postgresql'
 
