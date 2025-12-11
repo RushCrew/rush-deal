@@ -1,7 +1,7 @@
 package com.rushcrew.user_service.user.domain.entity;
 
-import com.rushcrew.user_service.point.domain.entity.PointWallet;
 import com.rushcrew.common.exception.BusinessException;
+import com.rushcrew.user_service.user.domain.common.BaseEntity;
 import com.rushcrew.user_service.user.domain.enums.UserRole;
 import com.rushcrew.user_service.user.domain.error.UserErrorCode;
 import jakarta.persistence.Column;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "p_user", schema = "user_schema")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
