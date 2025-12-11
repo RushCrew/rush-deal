@@ -1,5 +1,7 @@
 package com.rushcrew.user_service.point.domain.vo;
 
+import com.rushcrew.common.exception.BusinessException;
+import com.rushcrew.user_service.point.exception.PointErrorCode;
 import jakarta.persistence.Embeddable;
 import java.util.UUID;
 import lombok.AccessLevel;
@@ -17,7 +19,7 @@ public class OrderId {
 
     private OrderId(UUID orderId) {
         if (orderId == null) {
-            throw new IllegalArgumentException("유효하지 않은 주문 ID 입니다.");
+            throw new BusinessException(PointErrorCode.INVALID_ORDER_ID);
         }
         this.id = orderId;
     }

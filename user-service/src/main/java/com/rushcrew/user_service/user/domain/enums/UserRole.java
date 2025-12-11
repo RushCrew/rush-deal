@@ -1,5 +1,7 @@
 package com.rushcrew.user_service.user.domain.enums;
 
+import com.rushcrew.common.exception.BusinessException;
+import com.rushcrew.user_service.user.domain.error.UserErrorCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -14,7 +16,7 @@ public enum UserRole {
 
     public static UserRole of(String role) {
         if (role == null || role.trim().isEmpty()) {
-            throw new IllegalArgumentException("권한은 필수입니다");
+            throw new BusinessException(UserErrorCode.INVALID_USER_ROLE);
         }
 
         for (UserRole value : UserRole.values()) {
@@ -22,6 +24,6 @@ public enum UserRole {
                 return value;
             }
         }
-        throw new IllegalArgumentException("유효하지 않은 권한입니다: " + role);
+        throw new BusinessException(UserErrorCode.INVALID_USER_ROLE);
     }
 }
