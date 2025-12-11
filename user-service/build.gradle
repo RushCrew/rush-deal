@@ -1,40 +1,40 @@
 description = 'User Service for rush-deal Project'
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
 
-	// eureka
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    // eureka
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-	// jpa
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // jpa
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-	// database
-	runtimeOnly 'org.postgresql:postgresql'
+    // database
+    runtimeOnly 'org.postgresql:postgresql'
 
-	// validation
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	// 자체 공통 모듈
-	implementation 'com.github.RushCrew:rush-deal-common:v0.0.7'
+    // 자체 공통 모듈
+    implementation 'com.github.RushCrew:rush-deal-common:v0.0.7'
 
-	// 분산락
-	implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
+    // 분산락
+    implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
 
-	// QueryDSL JPA
-	implementation 'io.github.openfeign.querydsl:querydsl-core:7.0'
-	implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.0'
-	annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.0:jpa'
+    // QueryDSL JPA
+    implementation 'io.github.openfeign.querydsl:querydsl-core:7.0'
+    implementation 'io.github.openfeign.querydsl:querydsl-jpa:7.0'
+    annotationProcessor 'io.github.openfeign.querydsl:querydsl-apt:7.0:jpa'
 
-	// security
-	implementation 'org.springframework.boot:spring-boot-starter-security'
-	testImplementation 'org.springframework.security:spring-security-test'
+    // security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    testImplementation 'org.springframework.security:spring-security-test'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
 }
