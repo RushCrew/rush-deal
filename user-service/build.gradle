@@ -17,7 +17,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	// 자체 공통 모듈
-	implementation 'com.github.RushCrew:rush-deal-common:v0.0.7'
+	implementation 'com.github.RushCrew:rush-deal-common:v0.0.9'
 
 	// 분산락
 	implementation 'org.redisson:redisson-spring-boot-starter:3.35.0'
@@ -30,6 +30,10 @@ dependencies {
 	// security
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// kafka
+	testImplementation 'org.springframework.kafka:spring-kafka-test'
+	implementation 'org.springframework.kafka:spring-kafka'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
