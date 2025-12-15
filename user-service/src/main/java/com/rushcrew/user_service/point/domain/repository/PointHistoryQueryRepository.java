@@ -13,13 +13,15 @@ public interface PointHistoryQueryRepository {
     Optional<PointHistory> findLatestByUserId(Long userId);
 
     // 해당 주문에 대해 이미 확정 적립 이력이 존재하는지 확인
-    boolean existsEarnedHistoryByOrderId(UUID orderId);
+    boolean existsEarnedHistoryForOrderId(String orderId);
+
+    boolean existsBySagaId(String sagaId);
 
     // 해당 주문에 대해 어떤 포인트 이력이라도 존재하는지 확인
-    boolean existsHistoryByOrderId(UUID orderId);
+    boolean existsHistoryByOrderId(String orderId);
 
     // 해당 주문과 관련된 모든 포인트 이력을 생성 시각 기준 오름차순으로 조회
-    List<PointHistory> findAllByOrderId(UUID orderId);
+    List<PointHistory> findAllByOrderId(String orderId);
 
     // 배치 처리용: 특정 시점 이전의 미확정 포인트 이력을 타입/유저 기준으로 조회
     List<PointHistory> findPendingHistories(PointType type, LocalDateTime threshold, int limit);
