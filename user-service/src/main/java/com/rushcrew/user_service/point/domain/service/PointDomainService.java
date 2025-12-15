@@ -5,6 +5,7 @@ import com.rushcrew.user_service.point.domain.entity.PointHistory;
 import com.rushcrew.user_service.point.domain.repository.PointHistoryQueryRepository;
 import com.rushcrew.user_service.point.domain.vo.OrderId;
 import com.rushcrew.user_service.point.domain.vo.Point;
+import com.rushcrew.user_service.point.domain.vo.SagaId;
 import com.rushcrew.user_service.point.domain.vo.UserId;
 import com.rushcrew.user_service.point.exception.PointErrorCode;
 import java.util.ArrayList;
@@ -23,9 +24,11 @@ public class PointDomainService {
     public PointHistory createPendingEarnHistory(
         UserId userId,
         OrderId orderId,
+        SagaId sagaId,
         Point amount
     ) {
         // 1. 중복 적립 검증
+        validateSagaIdempotency(sagaId);
         validateNotAlreadyEarned(orderId);
 
         // 2. 현재 잔액 조회
@@ -36,7 +39,8 @@ public class PointDomainService {
             userId,
             orderId,
             amount,
-            currentBalance
+            currentBalance,
+            sagaId
         );
     }
 
@@ -44,7 +48,9 @@ public class PointDomainService {
     public PointHistory createPendingUseHistory(
         UserId userId,
         OrderId orderId,
-        Point amount)
+        SagaId sagaId,
+        Point amount
+    )
     {
         // 1. 중복 사용 검증
         validateNotAlreadyUsed(orderId);
@@ -58,18 +64,20 @@ public class PointDomainService {
             userId,
             orderId,
             amount,
-            currentBalance
+            currentBalance,
+            sagaId
+
         );
     }
 
 
     // 주문 취소 시 해당 주문의 모든 예비 포인트 취소 이력 생성
-    public List<PointHistory> cancelHistoriesForOrder(UserId userId, OrderId orderId) {
+    public List<PointHistory> cancelHistoriesForOrder(UserId userId, OrderId orderId, SagaId sagaId) {
         // 1. 관련 이력 일괄 조회
         List<PointHistory> pointHistories = queryRepository.findAllByOrderId(orderId.getId());
 
         // 2. 도메인 유효성 검증
-        validateCancelable(pointHistories, userId);
+        validateCancelable(pointHistories, userId, sagaId);
 
         // 3. 현재 잔액 조회 (계산의 기준점)
         Point currentBalance = getCurrentBalance(userId);
@@ -88,12 +96,18 @@ public class PointDomainService {
     }
 
 
-
     // 중복 적립 검증
     private void validateNotAlreadyEarned(OrderId orderId) {
-        boolean alreadyEarned = queryRepository.existsEarnedHistoryByOrderId(orderId.getId());
+        boolean alreadyEarned = queryRepository.existsEarnedHistoryForOrderId(orderId.getId());
 
         if (alreadyEarned) {
+            throw new BusinessException(PointErrorCode.DUPLICATE_POINT_EARN);
+        }
+    }
+
+    // 중복 적립 검증
+    private void validateSagaIdempotency(SagaId sagaId) {
+        if (queryRepository.existsBySagaId(sagaId.getId())) {
             throw new BusinessException(PointErrorCode.DUPLICATE_POINT_EARN);
         }
     }
@@ -107,7 +121,7 @@ public class PointDomainService {
     }
 
     // 취소 가능 여부 검증
-    private void validateCancelable(List<PointHistory> histories, UserId userId) {
+    private void validateCancelable(List<PointHistory> histories, UserId userId, SagaId sagaId) {
         if (histories.isEmpty()) {
             throw new BusinessException(PointErrorCode.POINT_HISTORY_NOT_FOUND);
         }
@@ -125,6 +139,11 @@ public class PointDomainService {
         // 이미 취소된 주문인지 검증
         if (histories.stream().anyMatch(PointHistory::isCanceled)) {
             throw new BusinessException(PointErrorCode.POINT_ALREADY_CANCELED);
+        }
+
+        // 동일한 Saga ID로 이미 처리된 이력이 있는지 검증
+        if (histories.stream().anyMatch(history -> history.hasSagaId(sagaId))) {
+            throw new BusinessException(PointErrorCode.INVALID_SAGA_ID);
         }
     }
 

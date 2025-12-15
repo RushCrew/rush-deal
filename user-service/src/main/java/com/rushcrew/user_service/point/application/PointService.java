@@ -11,6 +11,7 @@ import com.rushcrew.user_service.point.domain.repository.PointHistoryRepository;
 import com.rushcrew.user_service.point.domain.service.PointDomainService;
 import com.rushcrew.user_service.point.domain.vo.OrderId;
 import com.rushcrew.user_service.point.domain.vo.Point;
+import com.rushcrew.user_service.point.domain.vo.SagaId;
 import com.rushcrew.user_service.point.domain.vo.UserId;
 import com.rushcrew.user_service.point.exception.PointErrorCode;
 import jakarta.persistence.EntityManager;
@@ -46,6 +47,7 @@ public class PointService {
             PointHistory history = pointDomainService.createPendingEarnHistory(
                 UserId.of(command.userId()),
                 OrderId.of(command.orderId()),
+                SagaId.of(command.sagaId()),
                 Point.of(command.amount())
             );
             pointHistoryRepository.save(history);
@@ -58,6 +60,7 @@ public class PointService {
             PointHistory history = pointDomainService.createPendingUseHistory(
                 UserId.of(command.userId()),
                 OrderId.of(command.orderId()),
+                SagaId.of(command.sagaId()),
                 Point.of(command.amount())
             );
             pointHistoryRepository.save(history);
@@ -70,7 +73,8 @@ public class PointService {
             List<PointHistory> cancelHistories =
                 pointDomainService.cancelHistoriesForOrder(
                     UserId.of(command.userId()),
-                    OrderId.of(command.orderId())
+                    OrderId.of(command.orderId()),
+                    SagaId.of(command.sagaId())
                 );
             pointHistoryRepository.saveAll(cancelHistories);
         });
@@ -116,7 +120,8 @@ public class PointService {
                 pending.getOrderId(),
                 pending.getAmount(),
                 currentBalance,
-                itemTime
+                itemTime,
+                pending.getSagaId()
             );
 
             newConfirmHistories.add(confirmHistory);
