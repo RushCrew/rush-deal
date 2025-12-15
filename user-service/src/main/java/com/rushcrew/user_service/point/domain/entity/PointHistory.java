@@ -3,6 +3,7 @@ package com.rushcrew.user_service.point.domain.entity;
 import com.rushcrew.user_service.point.domain.enums.PointType;
 import com.rushcrew.user_service.point.domain.vo.OrderId;
 import com.rushcrew.user_service.point.domain.vo.Point;
+import com.rushcrew.user_service.point.domain.vo.SagaId;
 import com.rushcrew.user_service.point.domain.vo.UserId;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -44,10 +45,7 @@ public class PointHistory {
     private Point amount;
 
     @Embedded
-    @AttributeOverride(
-        name = "amount",
-        column = @Column(name = "balance_after")
-    )
+    @AttributeOverride(name = "amount", column = @Column(name = "balance_after"))
     private Point balanceAfter;
 
     @Enumerated(EnumType.STRING)
@@ -58,6 +56,10 @@ public class PointHistory {
 
     @Column(name = "confirmed_at")
     private LocalDateTime confirmedAt;
+
+    @Embedded
+    @AttributeOverride(name = "id", column = @Column(name = "saga_id"))
+    private SagaId sagaId;
 
     @PrePersist
     protected void onCreate() {
@@ -70,14 +72,16 @@ public class PointHistory {
         UserId userId,
         OrderId orderId,
         Point amount,
-        Point currentBalance
+        Point currentBalance,
+        SagaId sagaId
     ) {
         return create(
             userId,
             orderId,
             amount,
             currentBalance,
-            PointType.EARN_PENDING
+            PointType.EARN_PENDING,
+            sagaId
         );
     }
 
@@ -85,7 +89,8 @@ public class PointHistory {
         UserId userId,
         OrderId orderId,
         Point amount,
-        Point currentBalance
+        Point currentBalance,
+        SagaId sagaId
     ) {
         Point updatedBalance = currentBalance.subtract(amount.getAmount());
 
@@ -94,7 +99,8 @@ public class PointHistory {
             orderId,
             amount,
             updatedBalance,
-            PointType.USE_PENDING
+            PointType.USE_PENDING,
+            sagaId
         );
     }
 
@@ -103,9 +109,17 @@ public class PointHistory {
         OrderId orderId,
         Point amount,
         Point balanceAfter,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        SagaId sagaId
     ) {
-        PointHistory history = create(userId, orderId, amount, balanceAfter, PointType.EARN_CONFIRM);
+        PointHistory history = create(
+            userId,
+            orderId,
+            amount,
+            balanceAfter,
+            PointType.EARN_CONFIRM,
+            sagaId
+        );
         history.createdAt = createdAt;
         return history;
     }
@@ -114,14 +128,16 @@ public class PointHistory {
         UserId userId,
         OrderId orderId,
         Point amount,
-        Point balanceAfter
+        Point balanceAfter,
+        SagaId sagaId
     ) {
         return create(
             userId,
             orderId,
             amount,
             balanceAfter,
-            PointType.EARN_CONFIRM
+            PointType.EARN_CONFIRM,
+            sagaId
         );
     }
 
@@ -146,6 +162,11 @@ public class PointHistory {
         return this.type.isCanceledStatus(); // Enum 호출
     }
 
+    public boolean hasSagaId(SagaId sagaId) {
+        return this.sagaId.equals(sagaId);
+    }
+
+
     public boolean isEarnConfirmed() {
         return this.type.isConfirmedStatus(); // Enum 호출
     }
@@ -155,7 +176,8 @@ public class PointHistory {
         OrderId orderId,
         Point amount,
         Point balanceAfter,
-        PointType type
+        PointType type,
+        SagaId sagaId
     ) {
         PointHistory history = new PointHistory();
         history.userId = userId;
@@ -163,6 +185,7 @@ public class PointHistory {
         history.amount = amount;
         history.balanceAfter = balanceAfter;
         history.type = type;
+        history.sagaId = sagaId;
         return history;
     }
 
@@ -172,7 +195,8 @@ public class PointHistory {
             this.orderId,
             this.amount,
             currentBalance,
-            PointType.EARN_CANCEL
+            PointType.EARN_CANCEL,
+            sagaId
         );
     }
 
@@ -183,7 +207,8 @@ public class PointHistory {
             this.orderId,
             this.amount,
             updatedBalance,
-            PointType.USE_CANCEL
+            PointType.USE_CANCEL,
+            sagaId
         );
     }
 }

@@ -13,18 +13,19 @@ import org.springframework.util.StringUtils;
 @Getter
 @EqualsAndHashCode
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class OrderId {
+public class SagaId {
 
     private String id;
 
-    private OrderId(String orderId) {
-        if (!StringUtils.hasText(orderId)) {
-        throw new BusinessException(PointErrorCode.INVALID_ORDER_ID);
-    }
-        this.id = orderId;
+    private SagaId(String id) {
+        if (!StringUtils.hasText(id)) {
+            throw new BusinessException(PointErrorCode.INVALID_ORDER_ID);
+        }
+        this.id = id;
+
     }
 
-    public static OrderId of(String id) {
-        return new OrderId(id);
+    public static SagaId of(String id) {
+        return new SagaId(id);
     }
 }
