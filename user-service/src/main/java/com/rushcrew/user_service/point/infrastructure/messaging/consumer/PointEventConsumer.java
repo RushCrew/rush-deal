@@ -1,0 +1,68 @@
+package com.rushcrew.user_service.point.infrastructure.messaging.consumer;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rushcrew.user_service.point.application.PointService;
+import com.rushcrew.user_service.point.application.command.CancelOrderCommand;
+import com.rushcrew.user_service.point.application.command.CreatePendingPointCommand;
+import com.rushcrew.user_service.point.infrastructure.messaging.dto.PointEarnRequestedEvent;
+import com.rushcrew.user_service.point.infrastructure.messaging.dto.PointRefundRequestedEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class PointEventConsumer {
+
+    private final PointService pointService;
+    private final ObjectMapper objectMapper;
+
+    @KafkaListener(topics = "point.earn.requested", groupId = "point-service-group")
+    public void consumePointEarnRequested(
+        @Payload String message,
+        Acknowledgment acknowledgment
+    ) throws Exception {
+            PointEarnRequestedEvent event = objectMapper.readValue(
+                message,
+                PointEarnRequestedEvent.class
+            );
+
+            CreatePendingPointCommand command = new CreatePendingPointCommand(
+                event.userId(),
+                event.orderId(),
+                event.finalAmount(),
+                event.sagaId()
+            );
+
+            pointService.createPendingPoint(command);
+
+            acknowledgment.acknowledge();
+    }
+
+    @KafkaListener(topics = "point.refund.requested", groupId = "point-service-group")
+    public void consumePointRefundRequested(
+        @Payload String message,
+        Acknowledgment acknowledgment
+    ) throws Exception {
+
+        PointRefundRequestedEvent event = objectMapper.readValue(
+                message,
+                PointRefundRequestedEvent.class
+            );
+
+            CancelOrderCommand command = new CancelOrderCommand(
+                event.userId(),
+                event.orderId(),
+                event.sagaId()
+            );
+
+
+            pointService.cancelOrder(command);
+
+            acknowledgment.acknowledge();
+    }
+}

@@ -8,6 +8,7 @@ import com.rushcrew.user_service.point.domain.entity.PointHistory;
 import com.rushcrew.user_service.point.domain.enums.PointType;
 import com.rushcrew.user_service.point.domain.repository.PointHistoryQueryRepository;
 import com.rushcrew.user_service.point.domain.vo.OrderId;
+import com.rushcrew.user_service.point.domain.vo.SagaId;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ public class PointHistoryQueryRepositoryImpl
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public boolean existsEarnedHistoryByOrderId(UUID orderId) {
+    public boolean existsEarnedHistoryForOrderId(String orderId) {
         return (
             queryFactory
                 .selectOne()
@@ -37,7 +38,21 @@ public class PointHistoryQueryRepositoryImpl
     }
 
     @Override
-    public List<PointHistory> findAllByOrderId(UUID orderId) {
+    public boolean existsBySagaId(String sagaId) {
+        return (
+            queryFactory
+                .selectOne()
+                .from(pointHistory)
+                .where(
+                    pointHistory.sagaId.eq(SagaId.of(sagaId)),
+                    pointHistory.type.eq(PointType.EARN_CONFIRM)
+                )
+                .fetchFirst() != null
+        );
+    }
+
+    @Override
+    public List<PointHistory> findAllByOrderId(String orderId) {
         return queryFactory
             .selectFrom(pointHistory)
             .where(pointHistory.orderId.eq(OrderId.of(orderId)))
@@ -46,7 +61,7 @@ public class PointHistoryQueryRepositoryImpl
     }
 
     @Override
-    public boolean existsHistoryByOrderId(UUID orderId) {
+    public boolean existsHistoryByOrderId(String orderId) {
         return (
             queryFactory
                 .selectOne()
