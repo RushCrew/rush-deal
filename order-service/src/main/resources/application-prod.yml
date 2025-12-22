@@ -47,6 +47,12 @@ spring:
           threadPool:
             threadCount: ${QUARTZ_THREAD_COUNT:10}
 
+  data:
+    redis:
+      host: ${USER_REDIS_HOST:localhost}
+      port: ${USER_REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
   jpa:
     hibernate:
       ddl-auto:${JPA_DDL_AUTO:none} # 운영에선 none이나 validate로 바꾸기 위해 변수 처리
