@@ -64,5 +64,7 @@ subprojects {
         // 테스트 시에도 Lombok 사용 가능하도록
         testCompileOnly 'org.projectlombok:lombok'
         testAnnotationProcessor 'org.projectlombok:lombok'
+
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
     }
 }
