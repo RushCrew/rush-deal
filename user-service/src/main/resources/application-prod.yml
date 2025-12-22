@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: user-service
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -27,8 +31,10 @@ spring:
       password: ${REDIS_PASSWORD:}
 eureka:
   client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    # 유레카 클라이언트 자체를 끄기 (가장 확실)
+    register-with-eureka: false
+    fetch-registry: false
+    enabled: false
 
 management:
   endpoints:

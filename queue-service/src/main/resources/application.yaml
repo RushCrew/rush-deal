@@ -22,7 +22,7 @@ spring:
   data:
     redis:
       host: ${QUEUE_REDIS_HOST}
-      port: ${QUEUE_REDIS_PORT}
+      port: ${QUEUE_REDIS_PORT:6379}
 
   datasource:
     url: ${DB_URL}
