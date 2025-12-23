@@ -2,6 +2,11 @@ spring:
   application:
     name: product-service
 
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -21,12 +26,14 @@ spring:
 
 server:
   port: ${PRODUCT_SERVER_PORT:8020}
+  servlet:
+    context-path: /api/v1/  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 eureka:
   client:
     enabled: ${EUREKA_ENABLED:false}  # AWS에서는 false
-    service-url:
-      defaultZone: ${EUREKA_URL}
+    register-with-eureka: false
+    fetch-registry: true
 
 management:
   endpoints:
