@@ -121,20 +121,21 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: develop-${{ github.sha }}
         run: |
-          REPO_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
-          SERVICE_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
-          REAL_ECS_SERVICE_NAME="rushdeal-${{ matrix.service }}"
-          echo "----Deploying $SERVICE_NAME to ECS Cluster: $CLUSTER_NAME----"
+          # 실제 ECS에 등록된 서비스 이름을 정확히 맞춰야 합니다.
+          # matrix.service가 user-service라면 -> rushdeal-user-service
+          REAL_ECS_SERVICE_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
+          
+          echo "----Deploying to ECS Cluster: ${{ env.ECS_CLUSTER }}----"
+          echo "----Service Name: $REAL_ECS_SERVICE_NAME----"
           
           # ECS 서비스 강제 재배포 (최신 이미지 사용)
+          # --service 뒤에 반드시 $를 붙여 변수로 호출하세요.
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
-            --service REAL_ECS_SERVICE_NAME \
+            --service $REAL_ECS_SERVICE_NAME \
             --force-new-deployment \
             --region ${{ env.AWS_REGION }}
-          
-          echo "---Deployment triggered for $SERVICE_NAME"
-          echo "---Image: $ECR_REGISTRY/$REPO_NAME:$IMAGE_TAG"
+  
 
       - name: Wait for deployment to complete
         run: |
