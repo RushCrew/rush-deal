@@ -25,7 +25,7 @@ public class SecurityConfig {
                 // 경로별 권한 설정
                 // 보통 @PreAuthorize로 처리하므로 모두 허용하거나 authenticated로 설정
                 // Actuator나 헬스 체크 경로는 열어두는 것이 좋음
-                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/api/v1/actuator/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
