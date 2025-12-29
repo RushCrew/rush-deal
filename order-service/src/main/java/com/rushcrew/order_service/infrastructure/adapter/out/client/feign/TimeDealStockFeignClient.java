@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.rushcrew.order_service.infrastructure.dto.timedeal.TimeDealResponse;
 import com.rushcrew.order_service.infrastructure.dto.timedeal.TimeDealStockResponse;
 
-@FeignClient(name = "timedeal-service")
+@FeignClient(name = "timedeal-service", url = "${TIMEDEAL_SERVICE_URL}")
 public interface TimeDealStockFeignClient {
 
 	@GetMapping("/api/v1/timedeals/{timeDealId}/order")

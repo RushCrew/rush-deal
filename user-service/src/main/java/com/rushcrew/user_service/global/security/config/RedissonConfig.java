@@ -32,7 +32,7 @@ public class RedissonConfig {
             .setRetryInterval(1500);
 
         if (redisPassword != null && !redisPassword.trim().isEmpty()) {
-            singleServerConfig.setPassword(redisPassword);
+//            singleServerConfig.setPassword(redisPassword);
         }
 
         return Redisson.create(config);

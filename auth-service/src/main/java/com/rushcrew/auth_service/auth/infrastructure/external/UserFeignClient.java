@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", url = "${USER_SERVICE_URL}")
 public interface UserFeignClient {
     @PostMapping("/api/v1/users")
     UserCreateResponse createUser(@RequestBody UserCreateRequest request);

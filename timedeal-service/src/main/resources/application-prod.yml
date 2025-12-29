@@ -1,6 +1,10 @@
 spring:
   application:
     name: timedeal-service
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
   data:
     redis:
       host: ${TIMEDEAL_REDIS_HOST:localhost}
@@ -23,14 +27,23 @@ spring:
       mode: ${SQL_INIT_MODE:never} # 기본은 안 함. 로컬에서만 환경변수로 always 주입. 매번 초기화 스크립트 실행하는 문제 발생 (data.sql, schema.sql)
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    properties:
+      # [중요] MSK Serverless는 무조건 SASL_SSL + IAM 사용
+      security.protocol: SASL_SSL
+      sasl.mechanism: AWS_MSK_IAM
+      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
+      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
 
 server:
   port: ${TIMEDEAL_SERVER_PORT:8030}
+  servlet:
+    context-path: /api/v1  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 eureka:
   client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    enabled: ${EUREKA_ENABLED:false}  # AWS에서는 false
+    register-with-eureka: false
+    fetch-registry: true
 
 management:
   endpoints:

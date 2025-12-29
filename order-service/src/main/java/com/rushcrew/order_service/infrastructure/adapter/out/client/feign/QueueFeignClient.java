@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.rushcrew.common.dto.ApiResponse;
 
-@FeignClient(name = "queue-service")
+@FeignClient(name = "queue-service", url = "${QUEUE_SERVICE_URL}")
 public interface QueueFeignClient {
 
 	@GetMapping("/api/v1/internal/queues/tokens/verify")

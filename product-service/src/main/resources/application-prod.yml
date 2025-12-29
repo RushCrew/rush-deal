@@ -2,6 +2,11 @@ spring:
   application:
     name: product-service
 
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -20,13 +25,20 @@ spring:
       mode: ${SQL_INIT_MODE:never} # 기본은 안 함. 로컬에서만 환경변수로 always 주입. 매번 초기화 스크립트 실행하는 문제 발생 (data.sql, schema.sql)
 
 server:
+  tomcat:
+    accesslog:
+      enabled: true
+      pattern: "%h %l %u %t \"%r\" %s %b" # 표준 Apache 로그 형식
   port: ${PRODUCT_SERVER_PORT:8020}
+  address: 0.0.0.0  # 모든 네트워크 인터페이스에서 리스닝
+  servlet:
+    context-path: /api/v1  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 eureka:
   client:
     enabled: ${EUREKA_ENABLED:false}  # AWS에서는 false
-    service-url:
-      defaultZone: ${EUREKA_URL}
+    register-with-eureka: false
+    fetch-registry: true
 
 management:
   endpoints:
@@ -45,4 +57,5 @@ management:
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
