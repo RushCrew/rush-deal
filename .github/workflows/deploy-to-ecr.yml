@@ -115,12 +115,37 @@ jobs:
           
           echo "--- Successfully pushed $REPO_NAME"
 
-      # 7. ECS 서비스에 새로운 ERC 이미지 갱신 (# 예: user-service)
-      - name: Update ECS Service with new image
+      # 7. ECS 서비스에 새로운 ERC 이미지 갱신, 새로운 태스크 정의 등록 및 서비스 업데이트 (# 예: user-service)
+      - name: Register new Task Definition an Update ECS Service with new image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: develop-${{ github.sha }}
         run: |
+          # 이름 규칙 정의
+          # matrix.service: product-service -> SERVICE_BASE: product
+          SERVICE_BASE=$(echo "${{ matrix.service }}" | sed 's/-service//')
+    
+          # 태스크 정의 패밀리 명: rushdeal-product-task
+          TASK_FAMILY="rushdeal-${SERVICE_BASE}-task"
+          
+          
+          # 새 이미지 주소: .../rushdeal-product-service:develop-abcdef
+          NEW_IMAGE_URI="$ECR_REGISTRY/${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}:$IMAGE_TAG"
+          
+          echo "Target Task Family: $TASK_FAMILY"
+          echo "Target Service Name: $REAL_ECS_SERVICE_NAME"
+          echo "New Image URI: $NEW_IMAGE_URI"
+               
+          # 현재 사용 중인 태스크 정의를 가져옵니다.
+          TASK_DEFINITION=$(aws ecs describe-task-definition --task-definition $TASK_FAMILY --region ${{ env.AWS_REGION }})
+          
+          # 이미지 주소만 최신 이미지(SHA 포함된 것)로 갈아끼웁니다.
+          NEW_TASK_DEF=$(echo $TASK_DEFINITION | jq --arg IMAGE "$NEW_IMAGE_URI" \
+            '.taskDefinition | .containerDefinitions[0].image = $IMAGE | del(.taskDefinitionArn) | del(.revision) | del(.status) | del(.requiresAttributes) | del(.compatibilities) | del(.registeredAt) | del(.registeredBy)')
+          
+          # 새로운 태스크 정의 리비전을 등록합니다.
+          NEW_TASK_DEF_ARN=$(aws ecs register-task-definition --region ${{ env.AWS_REGION }} --cli-input-json "$NEW_TASK_DEF" --query 'taskDefinition.taskDefinitionArn' --output text)
+        
           # 실제 ECS에 등록된 서비스 이름을 정확히 맞춰야 합니다.
           # matrix.service가 user-service라면 -> rushdeal-user-service
           REAL_ECS_SERVICE_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
@@ -129,10 +154,11 @@ jobs:
           echo "----Service Name: $REAL_ECS_SERVICE_NAME----"
           
           # ECS 서비스 강제 재배포 (최신 이미지 사용)
-          # --service 뒤에 반드시 $를 붙여 변수로 호출하세요.
+          # 새 리비전으로 서비스를 업데이트 (새 태스크 정의)
           aws ecs update-service \
             --cluster ${{ env.ECS_CLUSTER }} \
             --service $REAL_ECS_SERVICE_NAME \
+            --task-definition $NEW_TASK_DEF_ARN \
             --force-new-deployment \
             --region ${{ env.AWS_REGION }}
   
