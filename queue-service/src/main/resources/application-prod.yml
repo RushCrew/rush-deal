@@ -68,7 +68,7 @@ eureka:
 server:
   port: ${QUEUE_SERVER_PORT:8040}
   servlet:
-    context-path: /api/v1/  # ALB가 넘겨주는 경로와 맞춰줍니다.
+    context-path: /api/v1  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 management:
   endpoints:
