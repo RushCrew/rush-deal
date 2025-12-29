@@ -52,9 +52,11 @@ management:
     prometheus:
       access: unrestricted
   tracing:
+    enabled: false
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}

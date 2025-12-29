@@ -139,16 +139,16 @@ jobs:
 
       - name: Wait for deployment to complete
         run: |
-          SERVICE_NAME="${{ matrix.service }}"
+          REAL_ECS_SERVICE_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
           
-          echo "---Waiting for $SERVICE_NAME deployment to stabilize..."
+          echo "---Waiting for $REAL_ECS_SERVICE_NAME deployment to stabilize..."
           
           aws ecs wait services-stable \
                       --cluster ${{ env.ECS_CLUSTER }} \
-                      --services $SERVICE_NAME \
+                      --services $REAL_ECS_SERVICE_NAME \
                       --region ${{ env.AWS_REGION }}
 
-                    echo "--- $SERVICE_NAME is now stable!"
+                    echo "--- $REAL_ECS_SERVICE_NAME is now stable!"
 
       # 8. 빌드 결과 요약
       - name: Image digest

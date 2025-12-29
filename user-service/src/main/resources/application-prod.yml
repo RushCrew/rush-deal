@@ -31,6 +31,27 @@ spring:
       host: ${USER_REDIS_HOST:localhost}
       port: ${USER_REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    properties:
+      # [중요] MSK Serverless는 무조건 SASL_SSL + IAM 사용
+      security.protocol: SASL_SSL
+      sasl.mechanism: AWS_MSK_IAM
+      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
+      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
+    consumer:
+      group-id: point-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual
+      host: ${USER_REDIS_HOST:localhost}
+      port: ${USER_REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
 eureka:
   client:
     # 유레카 클라이언트 자체를 끄기 (가장 확실)
@@ -56,3 +77,8 @@ management:
     zipkin:
       tracing:
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+
+logging:
+  level:
+    org.apache.kafka: ERROR # cloudwatch 불필요한 로그 쌓이는 것 방지 목적
+    org.springframework.kafka: ERROR
