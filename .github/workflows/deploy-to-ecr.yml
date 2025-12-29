@@ -115,16 +115,16 @@ jobs:
           
           echo "--- Successfully pushed $REPO_NAME"
 
-      # 7. ECS 서비스에 ERC 이미지 갱신 (# 예: user-service)
-      - name: Update ECS Service
+      # 7. ECS 서비스에 새로운 ERC 이미지 갱신 (# 예: user-service)
+      - name: Update ECS Service with new image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: develop-${{ github.sha }}
         run: |
           REPO_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
-          SERVICE_NAME="${{ matrix.service }}"  
+          SERVICE_NAME="${{ env.ECR_REPOSITORY_PREFIX }}-${{ matrix.service }}"
           
-          echo "----Deploying $SERVICE_NAME to ECS----"
+          echo "----Deploying $SERVICE_NAME to ECS Cluster: $CLUSTER_NAME----"
           
           # ECS 서비스 강제 재배포 (최신 이미지 사용)
           aws ecs update-service \
