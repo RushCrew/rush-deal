@@ -91,4 +91,17 @@ public interface QueueRepository {
      * @param userId
      */
     void removeTokenWithUserIdxKey(UUID productId, TokenId tokenId, Long userId);
+
+    /**
+     * 상품 품절 처리 (Kafka 수신 시 호출)
+     * @param productId
+     */
+    void setSoldOut(UUID productId, String status, LocalDateTime dealEndTime);
+
+    /**
+     * 품절 여부 확인 (대기열 진입 시 호출)
+     * @param productId
+     * @return
+     */
+    boolean isSoldOut(UUID productId);
 }

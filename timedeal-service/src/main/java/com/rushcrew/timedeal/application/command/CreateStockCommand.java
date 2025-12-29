@@ -4,7 +4,7 @@ import com.rushcrew.timedeal.presentation.dto.request.CreateStockRequest;
 import java.util.UUID;
 
 public record CreateStockCommand(
-    UUID productId,
+    UUID productId, // timeDealProductId
     Long totalStock
 ) {
 

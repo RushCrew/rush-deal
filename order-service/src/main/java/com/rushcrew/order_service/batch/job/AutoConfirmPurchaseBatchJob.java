@@ -92,6 +92,7 @@ public class AutoConfirmPurchaseBatchJob {
 					order.getUserId(),
 					order.getOrderId(),
 					order.getFinalAmount(),
+					order.getSagaId(),
 					"자동 구매확정"
 				);
 

@@ -1,11 +1,15 @@
 package com.rushcrew.order_service.infrastructure.adapter.persistence;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.rushcrew.order_service.application.command.port.out.OrderCommandPort;
+import com.rushcrew.order_service.domain.enums.OrderStatus;
 import com.rushcrew.order_service.domain.model.order.Order;
 import com.rushcrew.order_service.infrastructure.persistence.repository.OrderJpaRepository;
 
@@ -29,5 +33,10 @@ public class OrderCommandAdapter implements OrderCommandPort {
 	@Override
 	public Optional<Order> findById(UUID orderId) {
 		return orderJpaRepository.findById(orderId);
+	}
+
+	@Override
+	public List<Order> findTimedOutPendingOrders(OrderStatus orderStatus, Instant timeoutThreshold, PageRequest of) {
+		return orderJpaRepository.findByStatusAndOrderedAtBefore(orderStatus, timeoutThreshold, of);
 	}
 }

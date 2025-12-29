@@ -6,7 +6,6 @@ import com.rushcrew.timedeal.domain.entity.TimeDeal;
 import com.rushcrew.timedeal.domain.entity.TimeDealProduct;
 import com.rushcrew.timedeal.domain.vo.TimeDealStatus;
 import java.util.List;
-
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
@@ -25,4 +24,6 @@ public interface TimeDealRepository {
     Optional<TimeDealProduct> findProductByProductId(UUID productId);
 
     List<TimeDeal> findAllById(List<UUID> idList);
+
+    Optional<TimeDealForOrderResult> findForOrder(UUID timeDealId);
 }

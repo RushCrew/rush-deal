@@ -1,8 +1,23 @@
 package com.rushcrew.order_service.domain.enums;
 
 public enum SagaStepName {
-	VALIDATE_STOCK,
-	REQUEST_STOCK_RESERVATION,
-	DEDUCT_POINT,
-	CREATE_ORDER
+
+	CREATE_ORDER("주문 생성"),
+	VALIDATE_STOCK("재고 검증"),
+	USE_POINT("포인트 사용"),
+	REQUEST_STOCK_RESERVATION("재고 예약 요청"),
+
+	// 보상 트랜잭션
+	USE_POINT_COMPENSATE("포인트 사용 보상"),
+	REQUEST_STOCK_RESERVATION_COMPENSATE("재고 예약 요청 보상");
+
+	private final String description;
+
+	SagaStepName(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
+	}
 }

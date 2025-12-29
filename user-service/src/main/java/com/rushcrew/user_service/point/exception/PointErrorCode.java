@@ -15,6 +15,7 @@ public enum PointErrorCode implements ErrorCode {
     INVALID_POINT_PARAMETER(HttpStatus.BAD_REQUEST, "POINT-011", "유효하지 않은 포인트 파라미터입니다."),
     INVALID_USER_ID(HttpStatus.BAD_REQUEST, "POINT-012", "유효하지 않은 사용자 ID 입니다."),
     LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT, "POINT-013", "요청 폭주로 처리 실패했습니다."),
+    INVALID_SAGA_ID(HttpStatus.BAD_REQUEST, "POINT-014", "유효하지 않은 SAGA ID 입니다."),
 
     DUPLICATE_ORDER_PROCESSING(HttpStatus.CONFLICT, "POINT-003", "이미 처리된 주문입니다."),
     DUPLICATE_POINT_EARN(HttpStatus.CONFLICT, "POINT-004", "이미 적립된 주문입니다."),

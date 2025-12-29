@@ -47,25 +47,41 @@ public class KafkaConfig {
 		return new KafkaTemplate<>(producerFactory());
 	}
 
+	/**
+	 * Consumer 설정
+	 * - ErrorHandlingDeserializer로 래핑하여 역직렬화 오류 방지
+	 * - 실제 역직렬화는 StringDeserializer 사용
+	 */
 	@Bean
 	public ConsumerFactory<String, String> consumerFactory() {
 		Map<String, Object> configProps = new HashMap<>();
 		configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		configProps.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
-		configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-		configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-		configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, true);
+		// ErrorHandlingDeserializer를 메인 Deserializer로 설정
+		configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+		configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ErrorHandlingDeserializer.class);
+		// 실제 역직렬화에 사용할 Deserializer 지정
 		configProps.put(ErrorHandlingDeserializer.KEY_DESERIALIZER_CLASS, StringDeserializer.class);
 		configProps.put(ErrorHandlingDeserializer.VALUE_DESERIALIZER_CLASS, StringDeserializer.class);
+		configProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+		configProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, false);	// 수동 커밋 --> 메시지 처리 성공 시에만 커밋되므로 데이터 손실을 방지할 수 있음
+		// 세션 타임아웃 설정
+		configProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 30000);
+		configProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 300000);
 		return new DefaultKafkaConsumerFactory<>(configProps);
 	}
 
+	/**
+	 * Kafka Listener Container 설정
+	 * - RECORD 단위 ACK (메시지 단위 커밋)
+	 * - 수동 커밋 모드 사용
+	 */
 	@Bean
 	public ConcurrentKafkaListenerContainerFactory<String, String> kafkaListenerContainerFactory() {
 		ConcurrentKafkaListenerContainerFactory<String, String> factory =
 			new ConcurrentKafkaListenerContainerFactory<>();
 		factory.setConsumerFactory(consumerFactory());
+		// RECORD 단위 ACK: 메시지 처리 성공 시 즉시 커밋
 		factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.RECORD);
 		return factory;
 	}

@@ -5,9 +5,11 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rushcrew.order_service.application.command.dto.command.CreateOrderCommand;
 import com.rushcrew.order_service.application.port.out.OutboxPort;
+import com.rushcrew.order_service.application.port.out.StockEventPort;
 import com.rushcrew.order_service.application.saga.dto.OrderCreationSagaData;
 import com.rushcrew.order_service.application.saga.dto.SagaContext;
 import com.rushcrew.order_service.application.saga.dto.SagaStepResult;
+import com.rushcrew.order_service.infrastructure.messaging.event.OutboxEventType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +24,7 @@ public class RequestStockReservationStep {
 
 	private final OutboxPort outboxPort;
 	private final ObjectMapper objectMapper;
+	private final StockEventPort stockEventPort;
 
 	public SagaStepResult execute(SagaContext context, OrderCreationSagaData data) {
 		try {
@@ -47,7 +50,7 @@ public class RequestStockReservationStep {
 			outboxPort.createAndSave(
 				"ORDER_SAGA",                           // aggregateType
 				context.getSagaId(),                    // aggregateId (sagaId)
-				"STOCK_RESERVATION_REQUESTED",          // eventType
+				OutboxEventType.STOCK_RESERVATION_REQUESTED,
 				objectMapper.writeValueAsString(payload) // payload
 			);
 
@@ -61,9 +64,39 @@ public class RequestStockReservationStep {
 	}
 
 	public void compensate(SagaContext context, OrderCreationSagaData data) {
-		// 아무 것도 안 함
-		// 재고 복구는 타임딜 서비스가 order.cancelled 이벤트로 처리
+		try {
+			log.info("[Saga-{}] 재고 예약 취소 시작", context.getSagaId());
+
+			CreateOrderCommand command = data.getCommand();
+
+			// 각 주문 아이템에 대해 재고 예약 취소 이벤트 발행
+			command.orderItems().forEach(item -> {
+				try {
+					stockEventPort.publishStockReservationCancelled(
+						data.getOrderId(),           // orderId
+						item.timeDealStockId(),      // timeDealStockId
+						item.quantity(),             // quantity
+						"Saga 보상 트랜잭션"           // reason
+					);
+
+					log.info("[Saga-{}] 재고 예약 취소 완료: timeDealStockId={}, quantity={}",
+						context.getSagaId(), item.timeDealStockId(), item.quantity());
+
+				} catch (Exception e) {
+					log.error("[Saga-{}] 재고 예약 취소 실패: timeDealStockId={}",
+						context.getSagaId(), item.timeDealStockId(), e);
+					throw e; // 재시도를 위해 예외 전파
+				}
+			});
+
+			log.info("[Saga-{}] 모든 재고 예약 취소 완료", context.getSagaId());
+
+		} catch (Exception e) {
+			log.error("[Saga-{}] 재고 예약 취소 실패", context.getSagaId(), e);
+			throw new RuntimeException("재고 예약 취소 실패", e);
+		}
 	}
+
 
 	/**
 	 * 재고 예약 요청 페이로드

@@ -8,6 +8,7 @@ import com.rushcrew.timedeal.application.command.UpdateStockCountCommand;
 import com.rushcrew.timedeal.application.result.ConfirmStockResult;
 import com.rushcrew.timedeal.application.result.CreateStockResult;
 import com.rushcrew.timedeal.application.result.ReserveStockResult;
+import com.rushcrew.timedeal.application.result.StockLogResult;
 import com.rushcrew.timedeal.application.result.StockResult;
 import com.rushcrew.timedeal.application.result.UpdateStockCountResult;
 import com.rushcrew.timedeal.domain.vo.TimeDealStockStatus;
@@ -33,4 +34,6 @@ public interface StockService {
     ConfirmStockResult confirmStock(ConfirmStockCommand command);
 
     void restoreStock(RestoreStockCommand command);
+
+    Page<StockLogResult> getStockLogs(UUID stockId, String eventType, Pageable pageable);
 }

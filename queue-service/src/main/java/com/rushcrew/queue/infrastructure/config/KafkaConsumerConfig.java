@@ -25,6 +25,8 @@ import org.springframework.kafka.listener.CommonErrorHandler;
 import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
+import org.springframework.kafka.support.converter.RecordMessageConverter;
+import org.springframework.kafka.support.converter.StringJsonMessageConverter;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -48,6 +50,15 @@ public class KafkaConsumerConfig {
     }
 
     /**
+     * JSON 변환 담당 MessageConverter
+     * String으로 들어온 메시지를 리스너에 맞는 객체로 변환
+     */
+    @Bean
+    public RecordMessageConverter messageConverter() {
+        return new StringJsonMessageConverter();
+    }
+
+    /**
      * Producer Factory 설정
      * DLQ로 메시지를 보낼 때(Produce), 자바 객체를 JSON으로 직렬화하기 위해 필요함
      */
@@ -66,26 +77,15 @@ public class KafkaConsumerConfig {
      * JSON 메시지 어떻게 역직렬화할지 정의
      */
     @Bean
-    public ConsumerFactory<String, TokenRemoveEvent> consumerFactory() {
+    public ConsumerFactory<String, Object> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         // 로컬 환경: localhost:9092 / Docker 내부 통신: kafka:29092
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "queue-service-group");
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
 
-        // JSON 역직렬화 설정
-        JsonDeserializer<TokenRemoveEvent> deserializer = new JsonDeserializer<>(TokenRemoveEvent.class);
-        deserializer.setRemoveTypeHeaders(false);
-        deserializer.addTrustedPackages("*"); // 모든 패키지 신뢰
-        deserializer.setUseTypeMapperForKey(true);
-
-        // ErrorHandlingDeserializer: 역직렬화 실패 시 무한 루프 방지
-        return new DefaultKafkaConsumerFactory<>(
-            props,
-            new StringDeserializer(),
-            new ErrorHandlingDeserializer<>(deserializer)
-        );
+        return new DefaultKafkaConsumerFactory<>(props);
     }
 
     /**
@@ -93,10 +93,13 @@ public class KafkaConsumerConfig {
      * 여기서 재시도(Retry) 및 DLQ(Dead Letter Queue) 전략 주입
      */
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, TokenRemoveEvent> kafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, TokenRemoveEvent> factory =
+    public ConcurrentKafkaListenerContainerFactory<String, Object> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Object> factory =
             new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
+
+        // 컨버터 설정, 리스너가 DTO로 받을 수 있음
+        factory.setRecordMessageConverter(messageConverter());
 
         // 수동 커밋 사용 시 설정 (Listener에서 Acknowledgment 사용 시 필요)
         factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);

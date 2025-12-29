@@ -25,6 +25,63 @@ spring:
           max-idle: 8
           min-idle: 2
           max-wait: -1ms
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        register-health-indicator: true
+        sliding-window-type: COUNT_BASED
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+        record-exceptions:
+          - feign.FeignException.InternalServerError
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.Unauthorized
+          - feign.FeignException.Forbidden
+          - feign.FeignException.NotFound
+          - feign.FeignException.Conflict
+          - com.rushcrew.common.exception.BusinessException
+
+  retry:
+    instances:
+      userService:
+        max-attempts: 3
+        wait-duration: 1s
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - feign.FeignException.InternalServerError
+          - feign.FeignException.ServiceUnavailable
+          - feign.FeignException.GatewayTimeout
+          - java.net.ConnectException
+          - java.net.SocketTimeoutException
+        ignore-exceptions:
+          - feign.FeignException.BadRequest
+          - feign.FeignException.Unauthorized
+          - feign.FeignException.Forbidden
+          - feign.FeignException.NotFound
+          - feign.FeignException.Conflict
+          - com.rushcrew.common.exception.BusinessException
+
+  timelimiter:
+    instances:
+      userService:
+        timeout-duration: 3s
+        cancel-running-future: true
+
+server:
+  port: 9000
+
 eureka:
   client:
     service-url:

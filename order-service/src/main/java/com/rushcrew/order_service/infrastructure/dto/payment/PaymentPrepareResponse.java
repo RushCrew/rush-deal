@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public record PaymentPrepareResponse(
-
 	UUID paymentId,
 	String portOnePaymentId,
 	BigDecimal amount,

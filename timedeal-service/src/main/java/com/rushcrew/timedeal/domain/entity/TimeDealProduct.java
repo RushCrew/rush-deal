@@ -18,7 +18,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,15 +48,10 @@ public class TimeDealProduct extends BaseEntity {
     })
     private ProductItemIds itemIds;
 
-	// 할인된 가격 추가
-	@Column(name = "discount_price", precision = 10, scale = 2)
-	private BigDecimal discountPrice;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TimeDealProductStatus status;
 
-	// TODO: 할인 가격 저장
     public static TimeDealProduct create( // 생성시에는 재고가 안 채워졌기 때문에 품절 상태
         TimeDeal timeDeal,
         ProductItemIds itemIds

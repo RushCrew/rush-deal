@@ -1,49 +1,25 @@
 package com.rushcrew.order_service.application.port.out;
 
-/**
- * 메트릭 수집을 위한 Port (Application 계층)
- */
 public interface MetricsPort {
 
-	/**
-	 * Saga 성공 메트릭 기록
-	 */
+	// ==================== Saga 메트릭 ====================
+
 	void recordSagaSuccess();
-
-	/**
-	 * Saga 실패 메트릭 기록
-	 */
 	void recordSagaFailure();
+	void recordSagaTimeout();
+	void recordSagaRecoveryFailure();
 
-	/**
-	 * Outbox 이벤트 발행 메트릭 기록
-	 */
+	// ==================== Outbox 메트릭 ====================
+
 	void recordOutboxPublished();
 
-	/**
-	 * Redis 캐시 히트 메트릭 기록
-	 */
-	void recordCacheHit();
+	// ==================== Redis 캐시 메트릭 ====================
 
-	/**
-	 * Redis 캐시 미스 메트릭 기록
-	 */
+	void recordCacheHit();
 	void recordCacheMiss();
 
-	/**
-	 * 주문 생성 타이머 시작
-	 * @return Timer.Sample (타이머 샘플)
-	 */
+	// ==================== 주문 생성 타이머 ====================
+
 	Object startOrderCreationTimer();
-
-	/**
-	 * 주문 생성 타이머 종료
-	 * @param sample 타이머 샘플
-	 */
 	void stopOrderCreationTimer(Object sample);
-
-	void recordSagaTimeout();
-
-	void recordSagaRecoveryFailure();
 }
-

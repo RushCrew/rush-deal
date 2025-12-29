@@ -23,6 +23,19 @@ spring:
         order_updates: true
   data:
     redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6383}
+      password: ${REDIS_PASSWORD:}
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: point-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
       password: ${SPRING_DATA_REDIS_PASSWORD:}

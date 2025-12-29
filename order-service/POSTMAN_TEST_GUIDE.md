@@ -18,6 +18,8 @@
 
 ## 테스트 데이터 생성 순서
 
+### 0단계: 유저 생성 (User Service)
+유저 서비스를 실행하면 포인트 10000원 있는 테스트 유저(더미 데이터)가 생기므로 애플리케이션만 실행하면 된다.
 ### 1단계: 상품 생성 (Product Service)
 
 **POST** `http://localhost:8020/api/v1/products`

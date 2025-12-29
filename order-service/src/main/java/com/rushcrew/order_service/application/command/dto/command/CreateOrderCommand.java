@@ -1,14 +1,8 @@
 package com.rushcrew.order_service.application.command.dto.command;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.rushcrew.order_service.domain.vo.ShippingInfo;
-
-import lombok.Builder;
-
-@Builder
 public record CreateOrderCommand(
 	Long userId,
 	UUID timeDealId,
@@ -17,13 +11,19 @@ public record CreateOrderCommand(
 	String role,
 	List<OrderItemCommand> orderItems,
 	Long pointUsed,
-	ShippingInfo shippingInfo
+	ShippingInfoCommand shippingInfo
 ) {
-
-	@Builder
 	public record OrderItemCommand(
 		UUID timeDealStockId,
-		Long quantity,
-		BigDecimal price
+		Long quantity
+	) {}
+
+	public record ShippingInfoCommand(
+		String recipientName,
+		String recipientPhone,
+		String zipCode,
+		String addressBase,
+		String addressDetail,
+		String deliveryMessage
 	) {}
 }

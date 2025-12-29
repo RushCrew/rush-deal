@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import com.rushcrew.common.entity.BaseEntity;
+import com.rushcrew.order_service.domain.common.BaseEntity;
 import com.rushcrew.order_service.domain.enums.ReservationStatus;
 
 import jakarta.persistence.Column;

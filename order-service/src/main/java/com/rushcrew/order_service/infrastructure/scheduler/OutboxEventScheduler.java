@@ -171,14 +171,14 @@ public class OutboxEventScheduler {
 			// 포인트 이벤트
 			case "POINT_EARN_REQUESTED" -> "point.earn.requested";
 			case "POINT_REFUND_REQUESTED" -> "point.refund.requested";
-			case "POINT_DEDUCT_REQUESTED" -> "point.deduct.requested";
-
-			// 재고 예약 이벤트
-			case "STOCK_RESERVATION_REQUESTED" -> "stock.reservation.requested";
+			// case "POINT_DEDUCT_REQUESTED" -> "point.deduct.requested";
 
 			// 재고 이벤트
+			case "STOCK_RESERVATION_REQUESTED" -> "stock.reservation.requested";
 			case "STOCK_RESERVATION_CANCELLED" -> "stock.reservation.cancelled";
-			case "STOCK_ROLLBACK_REQUESTED" -> "stock.rollback.requested";
+
+			// 큐 이벤트
+			case "TOKEN_REMOVE_REQUESTED" -> "order-complete-token-remove";
 
 			default -> {
 				log.warn("알 수 없는 이벤트 타입: {}, 기본 토픽 사용: order.events", eventType);

@@ -34,7 +34,7 @@ public class StockEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleStockChanged(StockChangedEvent event) {
         try {
-            stockCache.changeCount(event.stockId(), event.quantity());
+            stockCache.increase(event.stockId(), event.quantity());
         } catch (Exception e) {
             log.error(
                 "StockChangedEvent 처리 중 Redis 반영 실패. stock={}, quantity={}",
@@ -46,7 +46,7 @@ public class StockEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleStockDeleted(StockDeletedEvent event) {
         try {
-            stockCache.evict(event.stockId());
+            stockCache.delete(event.stockId());
         } catch (Exception e) {
             log.error("StockDeletedEvent 처리 중 Redis 반영 실패. stock={}", event.stockId(), e);
         }
@@ -55,7 +55,7 @@ public class StockEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleStockReserved(StockReservedEvent event) {
         try {
-            stockCache.reserve(event.stockId(), event.quantity());
+            stockCache.decrease(event.stockId(), event.quantity());
         } catch (Exception e) {
             log.error(
                 "StockReservedEvent 처리 중 Redis 반영 실패. stock={}, quantity={}",
@@ -67,7 +67,7 @@ public class StockEventHandler {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleStockRestored(StockRestoredEvent event) {
         try {
-            stockCache.restore(event.stockId(), event.quantity());
+            stockCache.increase(event.stockId(), event.quantity());
         } catch (Exception e) {
             log.error(
                 "StockRestoredEvent 처리 중 Redis 반영 실패. stock={}, quantity={}",

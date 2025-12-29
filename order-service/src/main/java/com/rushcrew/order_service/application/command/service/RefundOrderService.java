@@ -1,6 +1,5 @@
 package com.rushcrew.order_service.application.command.service;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +19,7 @@ import com.rushcrew.order_service.application.port.out.StockEventPort;
 import com.rushcrew.order_service.domain.model.order.Order;
 import com.rushcrew.order_service.domain.model.order.OrderItem;
 import com.rushcrew.order_service.global.error.OrderErrorCode;
+import com.rushcrew.order_service.infrastructure.messaging.event.OutboxEventType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -68,12 +68,11 @@ public class RefundOrderService implements RefundOrderUseCase {
 			throw new BusinessException(OrderErrorCode.ORDER_CANNOT_REFUND);
 		}
 
-		// 결제 취소 (동기)
+		// 결제 취소
 		try {
 			paymentPort.cancelPayment(
 				order.getOrderId(),
-				order.getUserId(),
-				order.getFinalAmount()
+				order.getUserId()
 			);
 			log.info("결제 취소 완료: orderId={}, refundAmount={}",
 				order.getOrderId(), order.getFinalAmount());
@@ -96,6 +95,7 @@ public class RefundOrderService implements RefundOrderUseCase {
 				pointEventPort.publishPointRefundRequested(
 					savedOrder.getUserId(),
 					savedOrder.getOrderId(),
+					savedOrder.getSagaId(),
 					savedOrder.getPointUsed(),
 					"주문 환불에 의한 포인트 환불"
 				);
@@ -108,12 +108,11 @@ public class RefundOrderService implements RefundOrderUseCase {
 		// 재고 복구 이벤트 발행
 		for (OrderItem orderItem : savedOrder.getOrderItems()) {
 			try {
-				stockEventPort.publishStockRollbackRequested(
+				stockEventPort.publishStockReservationCancelled(
 					savedOrder.getOrderId(),
 					orderItem.getTimeDealStockId(),
 					orderItem.getQuantity(),
-					"주문 환불에 의한 재고 복구",
-					Instant.now()
+					"주문 환불에 의한 재고 복구"
 				);
 			} catch (Exception e) {
 				log.error("재고 이벤트 발행 실패", e);
@@ -135,7 +134,7 @@ public class RefundOrderService implements RefundOrderUseCase {
 			outboxPort.createAndSave(
 				"ORDER",
 				savedOrder.getOrderId(),
-				"ORDER_REFUNDED",
+				OutboxEventType.ORDER_REFUNDED,
 				objectMapper.writeValueAsString(eventPayload)
 			);
 		} catch (Exception e) {

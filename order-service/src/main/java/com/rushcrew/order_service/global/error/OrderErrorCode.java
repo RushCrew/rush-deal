@@ -27,7 +27,8 @@ public enum OrderErrorCode implements ErrorCode {
 	ORDER_CANNOT_UPDATE(HttpStatus.BAD_REQUEST, "ORDER_CANNOT_UPDATE", "수정 가능한 주문 상태가 아닙니다."),
 	ORDER_CANNOT_UPDATE_POINT(HttpStatus.BAD_REQUEST, "ORDER_CANNOT_UPDATE_POINT", "포인트 사용량은 결제 전(PENDING 상태)에서만 수정할 수 있습니다."),
 	ORDER_UPDATE_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "ORDER_UPDATE_TIME_EXPIRED", "주문 수정 가능 시간이 지났습니다."),
-	ORDER_UPDATE_NO_CHANGES(HttpStatus.BAD_REQUEST, "ORDER_UPDATE_NO_CHANGES", "수정할 항목이 없습니다.");
+	ORDER_UPDATE_NO_CHANGES(HttpStatus.BAD_REQUEST, "ORDER_UPDATE_NO_CHANGES", "수정할 항목이 없습니다."),
+	ORDER_CANNOT_UPDATE_POINT_AFTER_CREATION(HttpStatus.BAD_REQUEST, "ORDER_CANNOT_UPDATE_POINT_AFTER_CREATION", "주문 생성 후 포인트 사용량은 수정할 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String name;

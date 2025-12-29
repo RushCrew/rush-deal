@@ -1,5 +1,7 @@
 package com.rushcrew.queue.infrastructure.repository;
 
+import com.rushcrew.common.exception.BusinessException;
+import com.rushcrew.queue.common.QueueErrorCode;
 import com.rushcrew.queue.domain.entity.QueueToken;
 import com.rushcrew.queue.domain.repository.QueueRepository;
 import com.rushcrew.queue.domain.vo.TokenId;
@@ -31,10 +33,11 @@ public class RedisQueueRepository implements QueueRepository {
     private static final String WAITING_KEY = "queue:wait:product:%s";
     private static final String ACTIVE_KEY = "queue:active:product:%s";
     private static final String USER_INDEX_KEY = "queue:user:product:%s:%s"; // String (중복방지용)
+    private static final String PRODUCT_STATUS_KEY = "queue:product:status:%s"; // 카프카로부터 받아옴 - Value: "AVAILABLE" or "SOLDOUT"
 
     // FAST TRACK(대기열 진입 정책) 기준 인원 (100인 미만이면 대기열 토큰 생성 시 바로 활성열로 이동)
     // TODO: 추후 QueuePolicy (정책 DB)에서 관리하도록 수정 예정
-    private static final Long MAX_ACTIVE_COUNT = 100L;
+    private static final Long MAX_ACTIVE_COUNT = 0L;
 
     public RedisQueueRepository(StringRedisTemplate redisTemplate) {
         this.redisTemplate = redisTemplate;
@@ -56,7 +59,7 @@ public class RedisQueueRepository implements QueueRepository {
         if (secondsUntilClose < 0) {
             // 이미 종료된 이벤트면 진입 불가 처리
             log.warn("[QUEUE:ERROR] 이미 종료된 이벤트입니다. productId={}", token.getProductId());
-            return false;
+            throw new BusinessException(QueueErrorCode.NO_TIMEDEAL_PRODUCT);
         }
 
         // redis 사용자 인덱스 키 생성
@@ -68,7 +71,7 @@ public class RedisQueueRepository implements QueueRepository {
         Boolean isNewUser = redisTemplate.opsForValue().setIfAbsent(
             userIndexKey,
             newTokenValue,
-            Duration.ofMinutes(secondsUntilClose) // TTL 설정: 타임딜 종료 시간에 맞춰 자동 만료
+            Duration.ofSeconds(secondsUntilClose) // TTL 설정: 타임딜 종료 시간에 맞춰 자동 만료
         );
 
         // 유저별 대기열 키(USER_INDEX_KEY)가 이미 존재하는 경우 -> 진짜 유효한지 검증
@@ -93,6 +96,8 @@ public class RedisQueueRepository implements QueueRepository {
 
         // FAST TRACK 판단 : 활성열 인원 조회
         Long activeCount = countActiveTokens(token.getProductId());
+
+        log.warn("[QUEUE:INFO] 현재 활성열 인원 개수 count={}", activeCount);
         if (activeCount != null && activeCount < MAX_ACTIVE_COUNT) {
             // [Fast Track] 대기 없이 바로 활성 상태 진입
             return registerFastTrack(token, dealEndTime, activeTtl, userIndexKey);
@@ -259,6 +264,38 @@ public class RedisQueueRepository implements QueueRepository {
     }
 
     /**
+     * 상품 품절 처리 (Kafka 수신 시 호출)
+     * @param productId
+     */
+    @Override
+    public void setSoldOut(UUID productId, String status, LocalDateTime dealEndTime) {
+        String productStatusKey = getProductStatusKey(productId);
+
+        // TTL 계산 : (이벤트 종료 시간 - 현재 시간)
+        long secondsUntilClose = Duration.between(LocalDateTime.now(), dealEndTime).getSeconds();
+
+        // 이미 시간이 지난 경우 (음수가 나오면 에러 나거나 바로 만료 처리)
+        if (secondsUntilClose < 0) {
+            secondsUntilClose = 0;
+        }
+
+        // TTL 설정: 타임딜 종료 시간에 맞춰 자동 만료
+        redisTemplate.opsForValue().set(productStatusKey, status, Duration.ofSeconds(secondsUntilClose));
+        log.info("[QUEUE:SOLDOUT] 상품({}) 품절 상태로 변경", productId);
+    }
+
+    /**
+     * 품절 여부 확인 (enterQueue 진입 시 호출)
+     */
+    @Override
+    public boolean isSoldOut(UUID productId) {
+        String key = String.format(PRODUCT_STATUS_KEY, productId);
+        String status = redisTemplate.opsForValue().get(key);
+        return "SOLDOUT".equals(status);
+    }
+
+
+    /**
      * 본인 확인 (대기열 토큰 소유권 검증)
      */
     @Override
@@ -328,11 +365,15 @@ public class RedisQueueRepository implements QueueRepository {
     }
 
     private String getActiveKey(UUID productId) {
-        return String.format(ACTIVE_KEY, productId);
+        return String.format(ACTIVE_KEY, productId.toString());
     }
 
     private String getUserIndexKey(UUID productId, Long userId) {
         return String.format(USER_INDEX_KEY, productId, userId);
+    }
+
+    private String getProductStatusKey(UUID productId) {
+        return String.format(PRODUCT_STATUS_KEY, productId);
     }
 
     private double getExpireAt(Integer activeTtl) {

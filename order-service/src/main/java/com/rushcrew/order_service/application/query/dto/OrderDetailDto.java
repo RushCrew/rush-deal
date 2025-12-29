@@ -2,22 +2,17 @@ package com.rushcrew.order_service.application.query.dto;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-import com.rushcrew.order_service.domain.model.order.Order;
 import com.rushcrew.order_service.domain.vo.ShippingInfo;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class OrderDetailDto {
 	private UUID orderId;
 	private Long userId;
@@ -33,31 +28,67 @@ public class OrderDetailDto {
 	private ShippingInfo shippingInfo;
 	private List<OrderItemQueryDto> orderItems;
 
-	public static OrderDetailDto fromEntity(Order order) {
-		return OrderDetailDto.builder()
-			.orderId(order.getOrderId())
-			.userId(order.getUserId())
-			.orderStatus(order.getStatus().name())
-			.totalAmount(order.getTotalAmount())
-			.pointUsed(order.getPointUsed())
-			.finalAmount(order.getFinalAmount())
-			.orderedAt(order.getOrderedAt())
-			.paymentCompletedAt(order.getPaymentCompletedAt())
-			.purchaseConfirmedAt(order.getPurchaseConfirmedAt())
-			.cancelledAt(order.getCancelledAt())
-			.autoConfirmScheduledAt(order.getAutoConfirmScheduledAt())
-			.shippingInfo(order.getShippingInfo())
-			.orderItems(order.getOrderItems().stream()
-				.map(item -> OrderItemQueryDto.builder()
-					.orderItemId(item.getOrderItemId())
-					.productName(item.getProductName())
-					.optionName(item.getProductSnapshot().optionName())
-					.quantity(item.getQuantity())
-					.unitPrice(item.getUnitPrice())
-					.discountPrice(item.getDiscountPrice())
-					.subtotal(item.getSubtotal())
-					.build())
-				.collect(Collectors.toList()))
-			.build();
+	/**
+	 * QueryDSL Projections.constructor용 생성자
+	 * Order 정보만 받고, orderItems는 나중에 설정
+	 */
+	public OrderDetailDto(
+		UUID orderId,
+		Long userId,
+		String orderStatus,
+		BigDecimal totalAmount,
+		Long pointUsed,
+		BigDecimal finalAmount,
+		Instant orderedAt,
+		Instant paymentCompletedAt,
+		Instant purchaseConfirmedAt,
+		Instant cancelledAt,
+		Instant autoConfirmScheduledAt,
+		ShippingInfo shippingInfo
+	) {
+		this.orderId = orderId;
+		this.userId = userId;
+		this.orderStatus = orderStatus;
+		this.totalAmount = totalAmount;
+		this.pointUsed = pointUsed;
+		this.finalAmount = finalAmount;
+		this.orderedAt = orderedAt;
+		this.paymentCompletedAt = paymentCompletedAt;
+		this.purchaseConfirmedAt = purchaseConfirmedAt;
+		this.cancelledAt = cancelledAt;
+		this.autoConfirmScheduledAt = autoConfirmScheduledAt;
+		this.shippingInfo = shippingInfo;
+		this.orderItems = new ArrayList<>();
+	}
+
+	// 빌더용 전체 생성자
+	public OrderDetailDto(
+		UUID orderId,
+		Long userId,
+		String orderStatus,
+		BigDecimal totalAmount,
+		Long pointUsed,
+		BigDecimal finalAmount,
+		Instant orderedAt,
+		Instant paymentCompletedAt,
+		Instant purchaseConfirmedAt,
+		Instant cancelledAt,
+		Instant autoConfirmScheduledAt,
+		ShippingInfo shippingInfo,
+		List<OrderItemQueryDto> orderItems
+	) {
+		this.orderId = orderId;
+		this.userId = userId;
+		this.orderStatus = orderStatus;
+		this.totalAmount = totalAmount;
+		this.pointUsed = pointUsed;
+		this.finalAmount = finalAmount;
+		this.orderedAt = orderedAt;
+		this.paymentCompletedAt = paymentCompletedAt;
+		this.purchaseConfirmedAt = purchaseConfirmedAt;
+		this.cancelledAt = cancelledAt;
+		this.autoConfirmScheduledAt = autoConfirmScheduledAt;
+		this.shippingInfo = shippingInfo;
+		this.orderItems = orderItems != null ? orderItems : new ArrayList<>();
 	}
 }

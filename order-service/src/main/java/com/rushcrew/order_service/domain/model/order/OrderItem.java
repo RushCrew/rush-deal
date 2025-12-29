@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import org.hibernate.annotations.Type;
 
-import com.rushcrew.common.entity.BaseEntity;
+import com.rushcrew.order_service.domain.common.BaseEntity;
 import com.rushcrew.order_service.domain.vo.ProductSnapshot;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 

@@ -106,4 +106,40 @@ public class SagaInstance {
 			throw new RuntimeException("SagaData 역직렬화 실패", e);
 		}
 	}
+
+	/**
+	 * 특정 Step이 완료되었는지 확인
+	 * @param sagaStepName 확인할 Step 이름
+	 * @return 완료 여부
+	 */
+	public boolean hasCompletedStep(SagaStepName sagaStepName) {
+		return this.steps.stream()
+			.anyMatch(step ->
+				step.getStepName().equals(sagaStepName.name())
+					&& step.getStatus() == SagaStatus.COMPLETED
+			);
+	}
+
+	/**
+	 * 특정 Step의 상태 확인
+	 * @param sagaStepName 확인할 Step 이름
+	 * @return Step의 상태 (없으면 null)
+	 */
+	public SagaStatus getStepStatus(SagaStepName sagaStepName) {
+		return this.steps.stream()
+			.filter(step -> step.getStepName().equals(sagaStepName.name()))
+			.findFirst()
+			.map(SagaStep::getStatus)
+			.orElse(null);
+	}
+
+	/**
+	 * 완료된 모든 Step 목록 조회
+	 */
+	public List<String> getCompletedSteps() {
+		return this.steps.stream()
+			.filter(step -> step.getStatus() == SagaStatus.COMPLETED)
+			.map(SagaStep::getStepName)
+			.toList();
+	}
 }

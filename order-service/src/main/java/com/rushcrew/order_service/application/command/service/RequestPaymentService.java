@@ -13,10 +13,10 @@ import com.rushcrew.order_service.application.command.dto.result.RequestPaymentR
 import com.rushcrew.order_service.application.command.port.out.OrderCommandPort;
 import com.rushcrew.order_service.application.command.usecase.RequestPaymentUseCase;
 import com.rushcrew.order_service.application.port.out.OutboxPort;
-import com.rushcrew.order_service.application.port.out.PaymentEventPort;
 import com.rushcrew.order_service.application.port.out.PaymentPort;
 import com.rushcrew.order_service.domain.model.order.Order;
 import com.rushcrew.order_service.global.error.OrderErrorCode;
+import com.rushcrew.order_service.infrastructure.messaging.event.OutboxEventType;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,6 @@ public class RequestPaymentService implements RequestPaymentUseCase {
 
 	private final OrderCommandPort orderCommandPort;
 	private final PaymentPort paymentPort;
-	private final PaymentEventPort paymentEventPort;
 	private final OutboxPort outboxPort;
 	private final ObjectMapper objectMapper;
 
@@ -65,14 +64,6 @@ public class RequestPaymentService implements RequestPaymentUseCase {
 		order.completePayment();
 		Order savedOrder = orderCommandPort.save(order);
 
-		// 결제 완료 이벤트 발행 (kafka 비동기 통신 - outbox 패턴) --> TODO: 확인 필요
-		paymentEventPort.publishPaymentCompleted(
-			savedOrder.getOrderId(),
-			savedOrder.getUserId(),
-			savedOrder.getFinalAmount(),
-			Instant.now()
-		);
-
 		// ORDER_PAID 이벤트 outbox에 저장
 		try {
 			Map<String, Object> eventPayload = new HashMap<>();
@@ -86,7 +77,7 @@ public class RequestPaymentService implements RequestPaymentUseCase {
 			outboxPort.createAndSave(
 				"ORDER",
 				savedOrder.getOrderId(),
-				"ORDER_PAID",
+				OutboxEventType.ORDER_PAID,
 				objectMapper.writeValueAsString(eventPayload)
 			);
 		} catch (Exception e) {

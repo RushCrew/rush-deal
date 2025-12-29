@@ -1,5 +1,6 @@
 package com.rushcrew.timedeal.infrastructure.repository;
 
+import com.rushcrew.timedeal.application.result.StockLogResult;
 import com.rushcrew.timedeal.application.result.StockResult;
 import com.rushcrew.timedeal.domain.entity.StockLog;
 import com.rushcrew.timedeal.domain.entity.TimeDealStock;
@@ -43,5 +44,17 @@ public class StockRepositoryAdapter implements StockRepository {
     @Override
     public Optional<StockLog> findLastByStockIdAndOrderId(UUID stockId, UUID orderId) {
         return stockJpaRepository.findLastByStockIdAndOrderId(stockId, orderId);
+    }
+
+    @Override
+    public Page<StockLogResult> findLogByIdAndFilter(
+        UUID stockId, String eventType, Pageable pageable
+    ) {
+        return stockJpaRepository.findLogByIdAndFilter(stockId, eventType, pageable);
+    }
+
+    @Override
+    public Optional<TimeDealStock> findStockForReservation(UUID stockId) {
+        return stockJpaRepository.findStockForReservation(stockId);
     }
 }

@@ -2,14 +2,10 @@ spring:
   application:
     name: order-service
 
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration
-
   batch:
     jdbc:
-      initialize-schema: never   # SQL 스크립트로 처리
-      table-prefix: order_schema.BATCH_   # 스키마 명시
+      initialize-schema: never
+      table-prefix: order_schema.BATCH_
     job:
       enabled: false
 
@@ -55,7 +51,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto:${JPA_DDL_AUTO:none} # 운영에선 none이나 validate로 바꾸기 위해 변수 처리
+      ddl-auto: ${JPA_DDL_AUTO:none} # 운영에선 none이나 validate로 바꾸기 위해 변수 처리
     show-sql:  ${SHOW_SQL:false} # 운영에선 로그 너무 많이 찍히니 false로 끄기 위해
     properties:
       hibernate:
@@ -71,12 +67,15 @@ spring:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     consumer:
       group-id: order-service
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-#      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      auto-offset-reset: earliest
+    listener:
+      ack-mode: record # 메시지 단위로 commit
+    retry:
+      max-attempts: 3 # 최대 3번 재시도
+      backoff:
+        initial-interval: 1000 # 첫 재시도: 1초 후
+        multiplier: 2.0 # 재시도 간격: 1초 → 2초 → 4초
+        max-interval: 10000 # 최대 10초
 
 server:
   port: ${ORDER_SERVER_PORT:8050}
@@ -93,16 +92,27 @@ management:
       exposure:
         include: health,info,metrics,prometheus,scheduledtasks
       base-path: /actuator
+
   endpoint:
     health:
       show-details: always
     prometheus:
       access: unrestricted
 
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
   tracing:
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
-    zipkin:
-      tracing:
+    export:
+      zipkin:
+        enabled: ${ZIPKIN_ENABLED:false}
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}

@@ -66,7 +66,7 @@ public class OutboxEventType {
 	public static final String POINT_REFUND_REQUESTED = "POINT_REFUND_REQUESTED";
 
 	/** 포인트 차감 요청 */
-	public static final String POINT_DEDUCT_REQUESTED = "POINT_DEDUCT_REQUESTED";
+	// public static final String POINT_DEDUCT_REQUESTED = "POINT_DEDUCT_REQUESTED";
 
 	// ============================================
 	//              재고 이벤트

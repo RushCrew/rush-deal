@@ -13,19 +13,11 @@ public interface StockCache {
     void register(UUID stockId, Long available);
 
     /**
-     * Redis에 캐시된 타임딜 재고 정보 수량 증가/감소
-     *
-     * @param stockId  : Redis key에 사용되는 타임딜 재고 ID
-     * @param quantity : 증가/감소할 재고 수량
-     */
-    void changeCount(UUID stockId, Long quantity);
-
-    /**
      * Redis에 캐시된 타임딜 재고 정보 삭제(무효화)
      *
      * @param stockId : Redis key에 사용되는 타임딜 재고 ID
      */
-    void evict(UUID stockId);
+    void delete(UUID stockId);
 
     /**
      * Redis에 캐시된 재고 수량 차감
@@ -33,13 +25,7 @@ public interface StockCache {
      * @param stockId  : Redis key에 사용되는 타임딜 재고 ID
      * @param quantity : value에서 차감할 재고 수량 (예약된 재고 수량)
      */
-    void reserve(UUID stockId, Long quantity);
+    boolean decrease(UUID stockId, Long quantity);
 
-    /**
-     * Redis에 캐시된 재고 수량 복구(증가)
-     *
-     * @param stockId  : Redis key에 사용되는 타임딜 재고 ID
-     * @param quantity : value에서 증가할 재고 수량 (복구된 재고 수량)
-     */
-    void restore(UUID stockId, Long quantity);
+    void increase(UUID stockId, Long quantity);
 }

@@ -31,11 +31,10 @@ public class OrderQueryController {
 	@GetMapping("/{orderId}")
 	@PreAuthorize("hasAnyRole('USER', 'MASTER', 'SELLER')")
 	public ApiResponse<OrderDetailResponse> getOrderDetail(
-			@PathVariable UUID orderId,
-			@AuthenticationPrincipal UserDetailsImpl userDetails
-			) {
-		OrderDetailDto dto = getOrderDetailUseCase.getOrderDetail(orderId, userDetails.userId());
-
+		@PathVariable UUID orderId,
+		@AuthenticationPrincipal UserDetailsImpl userDetails
+	) {
+		OrderDetailDto dto = getOrderDetailUseCase.getOrderDetail(orderId, userDetails.userId(), userDetails.role());
 		return ApiResponse.success(OrderDetailResponse.from(dto));
 	}
 
@@ -48,7 +47,6 @@ public class OrderQueryController {
 		OrderSearchCriteria criteria = OrderSearchCriteria.builder()
 			.userId(userDetails.userId())
 			.build();
-
 		Page<OrderListDto> orders = getOrderListUseCase.getOrderList(criteria, pageable);
 		return ApiResponse.success(orders.map(OrderListResponse::from));
 	}

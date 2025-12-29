@@ -51,4 +51,16 @@ public class TimeDealRepositoryAdapter implements TimeDealRepository {
     public List<TimeDeal> findAllById(List<UUID> idList) {
         return timeDealJpaRepository.findAllById(idList);
     }
+
+    @Override
+    public Optional<TimeDealForOrderResult> findForOrder(UUID timeDealId) {
+        return timeDealJpaRepository.findForOrderNative(timeDealId)
+            .map(v -> new TimeDealForOrderResult(
+                v.getTimeDealId(),
+                v.getTitle(),
+                v.getStatus(),
+                v.getDiscountPrice(),
+                v.getLimitQuantity()
+            ));
+    }
 }

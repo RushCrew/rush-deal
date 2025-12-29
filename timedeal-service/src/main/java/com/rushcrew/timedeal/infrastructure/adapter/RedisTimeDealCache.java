@@ -32,6 +32,6 @@ public class RedisTimeDealCache implements TimeDealCache {
 
     @Override
     public void removeTimedOut(TimeDealQueueKey key, List<String> timeDealIds) {
-        redisTemplate.opsForZSet().remove(key.getKey(), timeDealIds);
+        redisTemplate.opsForZSet().remove(key.getKey(), timeDealIds.toArray());
     }
 }

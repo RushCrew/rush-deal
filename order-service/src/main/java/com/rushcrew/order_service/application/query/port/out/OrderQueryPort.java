@@ -12,7 +12,7 @@ import com.rushcrew.order_service.application.query.dto.OrderSearchCriteria;
 
 public interface OrderQueryPort {
 
-	Optional<OrderDetailDto> findById(UUID orderId);
+	Optional<OrderDetailDto> findOrderDetail(UUID orderId);
 
 	Page<OrderListDto> findByCriteria(OrderSearchCriteria criteria, Pageable pageable);
 }

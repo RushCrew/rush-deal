@@ -1,7 +1,7 @@
 package com.rushcrew.order_service.presentation.api.command;
 
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import com.rushcrew.order_service.global.security.model.UserDetailsImpl;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rushcrew.common.dto.ApiResponse;
@@ -28,24 +27,15 @@ import com.rushcrew.order_service.application.command.dto.result.CreateOrderResu
 import com.rushcrew.order_service.application.command.dto.result.RefundOrderResult;
 import com.rushcrew.order_service.application.command.dto.result.RequestPaymentResult;
 import com.rushcrew.order_service.application.command.dto.result.UpdateOrderResult;
-import com.rushcrew.order_service.application.command.mapper.CancelOrderCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.CancelOrderResultMapper;
-import com.rushcrew.order_service.application.command.mapper.RefundOrderCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.RefundOrderResultMapper;
 import com.rushcrew.order_service.application.command.usecase.CancelOrderUseCase;
 import com.rushcrew.order_service.application.command.usecase.ConfirmPurchaseUseCase;
 import com.rushcrew.order_service.application.command.usecase.CreateOrderUseCase;
 import com.rushcrew.order_service.application.command.usecase.RefundOrderUseCase;
 import com.rushcrew.order_service.application.command.usecase.RequestPaymentUseCase;
 import com.rushcrew.order_service.application.command.usecase.UpdateOrderUseCase;
-import com.rushcrew.order_service.application.command.mapper.ConfirmPurchaseCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.ConfirmPurchaseResultMapper;
-import com.rushcrew.order_service.application.command.mapper.CreateOrderCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.RequestPaymentCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.RequestPaymentResultMapper;
-import com.rushcrew.order_service.application.command.mapper.UpdateOrderCommandMapper;
-import com.rushcrew.order_service.application.command.mapper.UpdateOrderResultMapper;
-import com.rushcrew.order_service.global.util.RoleChecker;
+import com.rushcrew.order_service.presentation.mapper.CreateOrderCommandMapper;
+import com.rushcrew.order_service.presentation.mapper.UpdateOrderCommandMapper;
+import com.rushcrew.order_service.presentation.mapper.UpdateOrderResultMapper;
 import com.rushcrew.order_service.presentation.dto.request.CreateOrderRequest;
 import com.rushcrew.order_service.presentation.dto.request.UpdateOrderRequest;
 import com.rushcrew.order_service.presentation.dto.response.CancelOrderResponse;
@@ -65,20 +55,12 @@ public class OrderCommandController {
 	private final CreateOrderUseCase createOrderUseCase;
 	private final CreateOrderCommandMapper createOrderCommandMapper;
 	private final RequestPaymentUseCase requestPaymentUseCase;
-	private final RequestPaymentCommandMapper requestPaymentCommandMapper;
-	private final RequestPaymentResultMapper requestPaymentResultMapper;
 	private final ConfirmPurchaseUseCase confirmPurchaseUseCase;
-	private final ConfirmPurchaseCommandMapper confirmPurchaseCommandMapper;
-	private final ConfirmPurchaseResultMapper confirmPurchaseResultMapper;
 	private final UpdateOrderUseCase updateOrderUseCase;
 	private final UpdateOrderCommandMapper updateOrderCommandMapper;
 	private final UpdateOrderResultMapper updateOrderResultMapper;
 	private final CancelOrderUseCase cancelOrderUseCase;
-	private final CancelOrderCommandMapper cancelOrderCommandMapper;
-	private final CancelOrderResultMapper cancelOrderResultMapper;
 	private final RefundOrderUseCase refundOrderUseCase;
-	private final RefundOrderCommandMapper refundOrderCommandMapper;
-	private final RefundOrderResultMapper refundOrderResultMapper;
 
 	/**
 	 * 주문 생성 API (Saga 접수)
@@ -90,10 +72,8 @@ public class OrderCommandController {
 			@AuthenticationPrincipal UserDetailsImpl userDetails,
 			@RequestHeader("X-Queue-Token") String queueToken
 			) {
-		CreateOrderCommand command = createOrderCommandMapper.toCommand(request, userDetails.userId(), userDetails.role(), queueToken);
-		// Saga 접수
-		CreateOrderResult result = createOrderUseCase.createOrder(command);
-		// 반환 (PROCESSING 상태 + sagaId)
+		CreateOrderCommand command = createOrderCommandMapper.toCommand(request, userDetails.userId(), userDetails.role(), queueToken);	// Saga 접수
+		CreateOrderResult result = createOrderUseCase.createOrder(command);	// 반환 (PROCESSING 상태 + sagaId)
 		return ApiResponse.success(result);
 	}
 
@@ -106,10 +86,9 @@ public class OrderCommandController {
 		@PathVariable UUID orderId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
-		RequestPaymentCommand command = requestPaymentCommandMapper.toCommand(orderId, userDetails.userId());
-
+		RequestPaymentCommand command = RequestPaymentCommand.of(orderId, userDetails.userId());
 		RequestPaymentResult result = requestPaymentUseCase.requestPayment(command);
-		RequestPaymentResponse response = requestPaymentResultMapper.toResponse(result);
+		RequestPaymentResponse response = RequestPaymentResponse.from(result);
 		return ApiResponse.success(response);
 	}
 
@@ -122,10 +101,9 @@ public class OrderCommandController {
 		@PathVariable UUID orderId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
-		ConfirmPurchaseCommand command = confirmPurchaseCommandMapper.toCommand(orderId, userDetails.userId());
-
+		ConfirmPurchaseCommand command = ConfirmPurchaseCommand.of(orderId, userDetails.userId());
 		ConfirmPurchaseResult result = confirmPurchaseUseCase.confirmPurchase(command);
-		ConfirmPurchaseResponse response = confirmPurchaseResultMapper.toResponse(result);
+		ConfirmPurchaseResponse response = ConfirmPurchaseResponse.from(result);
 		return ApiResponse.success(response);
 	}
 
@@ -140,7 +118,6 @@ public class OrderCommandController {
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
 		UpdateOrderCommand command = updateOrderCommandMapper.toCommand(orderId, userDetails.userId(), request);
-
 		UpdateOrderResult result = updateOrderUseCase.updateOrder(command);
 		UpdateOrderResponse response = updateOrderResultMapper.toResponse(result);
 		return ApiResponse.success(response);
@@ -155,10 +132,9 @@ public class OrderCommandController {
 		@PathVariable UUID orderId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails
 	) {
-		CancelOrderCommand command = cancelOrderCommandMapper.toCommand(orderId, userDetails.userId());
-
+		CancelOrderCommand command = CancelOrderCommand.ofAdmin(orderId, userDetails.userId(), "관리자에 의한 취소");
 		CancelOrderResult result = cancelOrderUseCase.cancelOrder(command);
-		CancelOrderResponse response = cancelOrderResultMapper.toResponse(result);
+		CancelOrderResponse response = CancelOrderResponse.from(result);
 		return ApiResponse.success(response);
 	}
 
@@ -170,14 +146,12 @@ public class OrderCommandController {
 	public ApiResponse<RefundOrderResponse> refundOrder(
 		@PathVariable UUID orderId,
 		@AuthenticationPrincipal UserDetailsImpl userDetails,
-		@RequestBody(required = false) java.util.Map<String, String> requestBody
+		@RequestBody(required = false) Map<String, String> requestBody
 	) {
 		String reason = requestBody != null ? requestBody.get("reason") : null;
-
-		RefundOrderCommand command = refundOrderCommandMapper.toCommand(orderId, userDetails.userId(), reason);
-
+		RefundOrderCommand command = RefundOrderCommand.of(orderId, userDetails.userId(), reason);
 		RefundOrderResult result = refundOrderUseCase.refundOrder(command);
-		RefundOrderResponse response = refundOrderResultMapper.toResponse(result);
+		RefundOrderResponse response = RefundOrderResponse.from(result);
 		return ApiResponse.success(response);
 	}
 

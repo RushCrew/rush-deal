@@ -7,7 +7,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.rushcrew.order_service.application.query.dto.OrderDetailDto;
-import com.rushcrew.order_service.application.query.dto.OrderItemResult;
+import com.rushcrew.order_service.application.query.dto.OrderItemQueryDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -69,7 +69,7 @@ public class OrderDetailResponse {
 		private BigDecimal discountRate;
 
 		public static OrderItemResponse from(Object item) {
-			if (item instanceof OrderItemResult result) {
+			if (item instanceof OrderItemQueryDto result) {
 				return OrderItemResponse.builder()
 					.orderItemId(result.orderItemId())
 					.productName(result.productName())

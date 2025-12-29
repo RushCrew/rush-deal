@@ -8,5 +8,8 @@ import lombok.Builder;
 public record RequestPaymentCommand(
 	UUID orderId,
 	Long userId
-) {}
-
+) {
+	public static RequestPaymentCommand of(UUID orderId, Long userId) {
+		return new RequestPaymentCommand(orderId, userId);
+	}
+}

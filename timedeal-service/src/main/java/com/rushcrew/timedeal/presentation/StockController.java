@@ -4,6 +4,7 @@ import com.rushcrew.timedeal.application.command.CreateStockCommand;
 import com.rushcrew.timedeal.application.command.RestoreStockCommand;
 import com.rushcrew.timedeal.application.command.UpdateStockCountCommand;
 import com.rushcrew.timedeal.application.result.CreateStockResult;
+import com.rushcrew.timedeal.application.result.StockLogResult;
 import com.rushcrew.timedeal.application.result.StockResult;
 import com.rushcrew.timedeal.application.result.UpdateStockCountResult;
 import com.rushcrew.timedeal.application.service.StockService;
@@ -13,6 +14,7 @@ import com.rushcrew.timedeal.presentation.dto.request.CreateStockRequest;
 import com.rushcrew.timedeal.presentation.dto.request.RestoreStockRequest;
 import com.rushcrew.timedeal.presentation.dto.request.UpdateStockCountRequest;
 import com.rushcrew.timedeal.presentation.dto.response.CreateStockResponse;
+import com.rushcrew.timedeal.presentation.dto.response.StockLogResponse;
 import com.rushcrew.timedeal.presentation.dto.response.StockResponse;
 import com.rushcrew.timedeal.presentation.dto.response.UpdateStockCountResponse;
 import jakarta.validation.Valid;
@@ -104,5 +106,17 @@ public class StockController {
         RestoreStockCommand command = request.toCommand();
         stockService.restoreStock(command);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/logs")
+    @PreAuthorize("hasRole('MASTER')")
+    public ResponseEntity<Page<StockLogResponse>> getStockLogs(
+        @RequestParam(required = false) UUID stockId,
+        @RequestParam(required = false) String eventType,
+        @SortDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
+    ) {
+        Page<StockLogResult> result = stockService.getStockLogs(stockId, eventType, pageable);
+        Page<StockLogResponse> response = result.map(StockLogResponse::from);
+        return ResponseEntity.ok(response);
     }
 }

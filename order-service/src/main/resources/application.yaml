@@ -42,15 +42,13 @@ spring:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     consumer:
       group-id: order-service
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       auto-offset-reset: earliest
-      enable-auto-commit: true
-
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
+#      enable-auto-commit: true
+#    producer:
+#      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+#      value-serializer: org.apache.kafka.common.serialization.StringSerializer
     # 재시도 설정 추가
     listener:
       ack-mode: record # 메시지 단위로 commit

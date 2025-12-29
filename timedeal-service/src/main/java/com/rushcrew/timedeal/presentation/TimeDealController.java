@@ -2,6 +2,7 @@ package com.rushcrew.timedeal.presentation;
 
 import com.rushcrew.timedeal.application.command.CreateTimeDealCommand;
 import com.rushcrew.timedeal.application.command.UpdateTimeDealCommand;
+import com.rushcrew.timedeal.application.result.CreateTimeDealResult;
 import com.rushcrew.timedeal.application.result.TimeDealDetailResult;
 import com.rushcrew.timedeal.application.result.TimeDealForOrderResult;
 import com.rushcrew.timedeal.application.result.TimeDealResult;
@@ -11,6 +12,7 @@ import com.rushcrew.timedeal.domain.vo.TimeDealStatus;
 import com.rushcrew.timedeal.global.security.model.UserDetailsImpl;
 import com.rushcrew.timedeal.presentation.dto.request.CreateTimeDealRequest;
 import com.rushcrew.timedeal.presentation.dto.request.UpdateTimeDealRequest;
+import com.rushcrew.timedeal.presentation.dto.response.CreateTimeDealResponse;
 import com.rushcrew.timedeal.presentation.dto.response.TimeDealDetailResponse;
 import com.rushcrew.timedeal.presentation.dto.response.TimeDealForOrderResponse;
 import com.rushcrew.timedeal.presentation.dto.response.TimeDealResponse;
@@ -44,14 +46,14 @@ public class TimeDealController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('MASTER', 'SELLER')")
-    public ResponseEntity<UUID> createTimeDeal(
+    public ResponseEntity<CreateTimeDealResponse> createTimeDeal(
         @Valid @RequestBody CreateTimeDealRequest request,
         @AuthenticationPrincipal UserDetailsImpl principal
     ) {
         CreateTimeDealCommand command = request.toCommand();
-        UUID timeDealId =
+        CreateTimeDealResult result =
             timeDealService.createTimeDeal(principal.userId(), principal.role(), command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeDealId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateTimeDealResponse.from(result));
     }
 
     @PatchMapping("/{timeDealId}")
