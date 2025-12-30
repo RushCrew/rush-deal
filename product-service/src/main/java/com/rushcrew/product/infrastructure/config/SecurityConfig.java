@@ -31,6 +31,7 @@ public class SecurityConfig {
                 // Actuator나 헬스 체크 경로는 열어두는 것이 좋음
                 .requestMatchers("/actuator/**", "/health").permitAll()
                 .requestMatchers("/api/v1/products/**").permitAll()
+                .requestMatchers("/internal/v1/products").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

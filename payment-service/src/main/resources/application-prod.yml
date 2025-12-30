@@ -24,8 +24,6 @@ spring:
 
 server:
   port: ${PAYMENT_SERVER_PORT:8010}
-  servlet:
-    context-path: /api/v1  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 eureka:
   client:
