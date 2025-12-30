@@ -30,6 +30,7 @@ public class SecurityConfig {
                 // 보통 @PreAuthorize로 처리하므로 모두 허용하거나 authenticated로 설정
                 // Actuator나 헬스 체크 경로는 열어두는 것이 좋음
                 .requestMatchers("/actuator/**", "/health").permitAll()
+                .requestMatchers("/api/v1/products/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
