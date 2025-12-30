@@ -15,34 +15,6 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  quartz:
-    job-store-type: jdbc
-    jdbc:
-      initialize-schema: ${QUARTZ_INIT_SCHEMA:never}  # 환경변수로 제어   # Quartz 자동 초기화 사용
-    properties:
-      org:
-        quartz:
-          scheduler:
-            instanceName: OrderScheduler
-            instanceId: AUTO
-
-          dataSource:
-            main:
-              driver: org.postgresql.Driver
-              URL: ${DB_URL}
-              user: ${DB_USERNAME}
-              password: ${DB_PASSWORD}
-
-          jobStore:
-            class: org.quartz.impl.jdbcjobstore.JobStoreTX
-            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
-            tablePrefix: quartz_schema.QRTZ_
-            isClustered: true
-            useProperties: false
-
-          threadPool:
-            threadCount: ${QUARTZ_THREAD_COUNT:10}
-
   data:
     redis:
       host: ${USER_REDIS_HOST:localhost}
@@ -77,6 +49,7 @@ spring:
         multiplier: 2.0 # 재시도 간격: 1초 → 2초 → 4초
         max-interval: 10000 # 최대 10초
 
+
 server:
   port: ${ORDER_SERVER_PORT:8050}
 
@@ -90,29 +63,18 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus,scheduledtasks
+        include: health,info,metrics,prometheus
       base-path: /actuator
-
   endpoint:
     health:
       show-details: always
     prometheus:
       access: unrestricted
-
-  metrics:
-    tags:
-      application: ${spring.application.name}
-
-  prometheus:
-    metrics:
-      export:
-        enabled: true
-
   tracing:
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
-    export:
-      zipkin:
-        enabled: ${ZIPKIN_ENABLED:false}
+    zipkin:
+      tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
