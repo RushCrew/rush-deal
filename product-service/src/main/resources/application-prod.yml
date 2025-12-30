@@ -30,9 +30,6 @@ server:
       enabled: true
       pattern: "%h %l %u %t \"%r\" %s %b" # 표준 Apache 로그 형식
   port: ${PRODUCT_SERVER_PORT:8020}
-  address: 0.0.0.0  # 모든 네트워크 인터페이스에서 리스닝
-  servlet:
-    context-path: /api/v1  # ALB가 넘겨주는 경로와 맞춰줍니다.
 
 eureka:
   client:
