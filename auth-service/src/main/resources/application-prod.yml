@@ -58,6 +58,10 @@ management:
   endpoint:
     health:
       show-details: always
+      redis:
+        enabled: false  # Redis가 죽어도 전체 앱을 DOWN 시키지 않음
+      db:
+        enabled: false     # DB가 죽어도 전체 앱을 DOWN 시키지 않음
     prometheus:
       access: unrestricted
   tracing:
