@@ -10,7 +10,7 @@ import com.rushcrew.order_service.infrastructure.dto.point.CancelPointRequest;
 import com.rushcrew.order_service.infrastructure.dto.point.PointBalanceResponse;
 import com.rushcrew.order_service.infrastructure.dto.point.UsePointRequest;
 
-@FeignClient(name = "user-service")
+@FeignClient(name = "user-service", url = "${USER_SERVICE_URL}")
 public interface PointFeignClient {
 
 	/* 포인트 사용 */

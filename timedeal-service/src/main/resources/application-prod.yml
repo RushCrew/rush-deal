@@ -9,6 +9,8 @@ spring:
     redis:
       host: ${TIMEDEAL_REDIS_HOST:localhost}
       port: ${TIMEDEAL_REDIS_PORT:6382}
+      ssl:
+        enabled: true # 스프링 부트에서도 SSL(TLS)을 사용하겠다고 설정
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
