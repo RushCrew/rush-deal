@@ -8,12 +8,6 @@ spring:
   kafka:
     # 환경변수 KAFKA_BROKERS가 있으면 그걸 쓰고, 없으면 로컬값(localhost:9092) 사용
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}  # 로컬 개발 환경 기준 (Docker 내부 통신 시 kafka:29092)
-    properties:
-      # [중요] MSK Serverless는 무조건 SASL_SSL + IAM 사용
-      security.protocol: SASL_SSL
-      sasl.mechanism: AWS_MSK_IAM
-      sasl.jaas.config: software.amazon.msk.auth.iam.IAMLoginModule required;
-      sasl.client.callback.handler.class: software.amazon.msk.auth.iam.IAMClientCallbackHandler
     consumer:
       group-id: queue-service-group   # 컨슈머 그룹 ID (중요)
       auto-offset-reset: latest       # 가장 최신 메시지부터 읽음
