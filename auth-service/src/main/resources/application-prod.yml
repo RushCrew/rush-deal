@@ -31,6 +31,9 @@ server:
 
 eureka:
   client:
+    enabled: false # Eureka 클라이언트 기능 자체를 끕니다.
+    register-with-eureka: false # 서버에 등록하지 않음
+    fetch-registry: false # 서버로부터 정보를 가져오지 않음
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 
@@ -58,9 +61,11 @@ management:
     prometheus:
       access: unrestricted
   tracing:
+    enabled: false
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
