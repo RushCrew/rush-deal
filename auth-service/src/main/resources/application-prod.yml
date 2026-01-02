@@ -19,7 +19,7 @@ spring:
       port: ${AUTH_REDIS_PORT:6378}
       password: ${REDIS_PASSWORD}
       ssl:
-        enabled: true # 스프링 부트에서도 SSL(TLS)을 사용하겠다고 설정
+        enabled: false # 스프링 부트에서도 SSL(TLS)을 사용하겠다고 설정
       timeout: 3000ms
       lettuce:
         pool:
