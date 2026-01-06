@@ -8,7 +8,7 @@ import java.util.UUID;
 public record PaymentPrepareResponse(
         UUID paymentId,
         String portOnePaymentId,
-        BigDecimal amount,
+        Long amount,
         String status
 ) {
     public static PaymentPrepareResponse from(PaymentPrepareResult result) {

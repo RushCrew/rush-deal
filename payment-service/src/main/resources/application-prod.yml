@@ -1,6 +1,10 @@
 spring:
   application:
     name: payment-service
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -24,8 +28,8 @@ server:
 eureka:
   client:
     enabled: ${EUREKA_ENABLED:false}  # AWS에서는 false
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: false
+    fetch-registry: true
 
 portone:
   secret:
@@ -46,9 +50,11 @@ management:
     prometheus:
       access: unrestricted
   tracing:
+    enabled: false
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}

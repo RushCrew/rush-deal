@@ -79,9 +79,6 @@ resilience4j:
         timeout-duration: 3s
         cancel-running-future: true
 
-server:
-  port: 9000
-
 eureka:
   client:
     service-url:

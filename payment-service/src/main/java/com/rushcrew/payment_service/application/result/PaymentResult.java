@@ -9,7 +9,7 @@ import java.util.UUID;
 public record PaymentResult(
         UUID paymentId,
         UUID orderId,
-        BigDecimal totalAmount,
+        Long totalAmount,
         String status
 ) {
     public static PaymentResult from(Payment payment) {

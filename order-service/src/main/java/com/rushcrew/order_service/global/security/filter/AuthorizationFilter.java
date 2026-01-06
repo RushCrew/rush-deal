@@ -27,6 +27,13 @@ public class AuthorizationFilter extends OncePerRequestFilter {
             FilterChain filterChain
     ) throws IOException, ServletException {
 
+        String requestURI = request.getRequestURI();
+        // internal 경로는 JWT 검사 없이 바로 통과시키기
+        if (requestURI.startsWith("/api/v1/internal/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String userId = request.getHeader(USER_ID_HEADER);
         String email = request.getHeader(USER_NAME_HEADER);
         String role = request.getHeader(USER_ROLE_HEADER);

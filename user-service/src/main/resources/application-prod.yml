@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: user-service
+  cloud:
+    service-registry:
+      auto-registration:
+        enabled: false
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
@@ -25,10 +29,27 @@ spring:
       host: ${USER_REDIS_HOST:localhost}
       port: ${USER_REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: point-service-group
+      auto-offset-reset: earliest
+      enable-auto-commit: false
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: manual
+      host: ${USER_REDIS_HOST:localhost}
+      port: ${USER_REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
 eureka:
   client:
-    service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    # 유레카 클라이언트 자체를 끄기 (가장 확실)
+    register-with-eureka: false
+    fetch-registry: false
+    enabled: false
 
 management:
   endpoints:
@@ -47,4 +68,10 @@ management:
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
+
+logging:
+  level:
+    org.apache.kafka: ERROR # cloudwatch 불필요한 로그 쌓이는 것 방지 목적
+    org.springframework.kafka: ERROR

@@ -18,6 +18,8 @@ spring:
       host: ${AUTH_REDIS_HOST:localhost}
       port: ${AUTH_REDIS_PORT:6378}
       password: ${REDIS_PASSWORD}
+      ssl:
+        enabled: false # 스프링 부트에서도 SSL(TLS)을 사용하겠다고 설정
       timeout: 3000ms
       lettuce:
         pool:
@@ -31,6 +33,9 @@ server:
 
 eureka:
   client:
+    enabled: false # Eureka 클라이언트 기능 자체를 끕니다.
+    register-with-eureka: false # 서버에 등록하지 않음
+    fetch-registry: false # 서버로부터 정보를 가져오지 않음
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
 
@@ -55,12 +60,18 @@ management:
   endpoint:
     health:
       show-details: always
+      redis:
+        enabled: false  # Redis가 죽어도 전체 앱을 DOWN 시키지 않음
+      db:
+        enabled: false     # DB가 죽어도 전체 앱을 DOWN 시키지 않음
     prometheus:
       access: unrestricted
   tracing:
+    enabled: false
     sampling:
       probability: ${MANAGEMENT_TRACING_SAMPLING_PROBABILITY:1.0}
 
     zipkin:
       tracing:
+        enabled: false
         endpoint: ${MANAGEMENT_ZIPKIN_TRACING_ENDPOINT:http://localhost:9411/api/v2/spans}
