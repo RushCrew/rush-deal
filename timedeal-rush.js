@@ -10,6 +10,8 @@ import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.1/index.js';
 const errorRate = new Rate('errors');
 const enterQueueSuccess = new Rate('enter_queue_success');
 
+const USER_ID_OFFSET = 1000;
+
 // ============================================
 // 2. 테스트 설정 (시나리오 정의)
 // ============================================
@@ -57,7 +59,7 @@ export const options = {
 // 3. 환경 변수 (수정 필요)
 // ============================================
 const BASE_URL = __ENV.BASE_URL || 'https://f2iy2uv1o3.execute-api.ap-northeast-2.amazonaws.com';
-const PRODUCT_ID = __ENV.PRODUCT_ID || '1e76c9ef-ed5a-4707-9aa2-bc3c50693240';
+const PRODUCT_ID = __ENV.PRODUCT_ID || '82b2c5d1-b3e4-4614-8167-1da00591cffb';
 
 // ============================================
 // 4. JWT 토큰 생성 (간소화 버전)
@@ -75,8 +77,7 @@ function generateTestToken(userId) {
 export default function () {
   // 각 가상 유저(VU)는 고유한 userId를 가짐
   // const userId = __VU;  // Virtual User ID (1, 2, 3, ...)
-  const timestamp = Date.now();
-  const userId = timestamp + __VU;
+  const userId = __VU + USER_ID_OFFSET;
 
   // JWT 토큰 생성
   const token = generateTestToken(userId);
